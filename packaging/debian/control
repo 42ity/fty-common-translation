@@ -1,0 +1,64 @@
+#
+#    fty-common-translation - Provides common translation library
+#
+#    Copyright (C) 2014 - 2018 Eaton
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc.,
+#    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Source:         fty-common-translation
+Section:        net
+Priority:       optional
+Maintainer:     fty-common-translation Developers <eatonipcopensource@eaton.com>
+Standards-Version: 4.0.1.0
+Build-Depends: debhelper (>= 9),
+    pkg-config,
+    libzmq3-dev,
+    libczmq-dev,
+    libmlm-dev,
+    libfty-common-mlm-dev,
+    asciidoc-base | asciidoc, xmlto,
+    dh-autoreconf
+
+Package: libfty-common-translation1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: fty-common-translation shared library
+ This package contains shared library for fty-common-translation:
+ provides common translation library
+
+Package: libfty-common-translation-dev
+Architecture: any
+Section: libdevel
+Depends:
+    ${misc:Depends},
+    libzmq3-dev,
+    libczmq-dev,
+    libmlm-dev,
+    libfty-common-mlm-dev,
+    libfty-common-translation1 (= ${binary:Version})
+Description: fty-common-translation development tools
+ This package contains development files for fty-common-translation:
+ provides common translation library
+
+Package: fty-common-translation-dbg
+Architecture: any
+Section: debug
+Priority: optional
+Depends:
+    libfty-common-translation1 (= ${binary:Version}),
+    ${misc:Depends}
+Description: fty-common-translation debugging symbols
+ This package contains the debugging symbols for fty-common-translation:
+ provides common translation library.

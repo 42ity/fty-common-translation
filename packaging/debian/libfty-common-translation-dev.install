@@ -1,0 +1,3 @@
+usr/include/*
+usr/lib/*/libfty_common_translation.so
+usr/lib/*/pkgconfig/libfty_common_translation.pc
