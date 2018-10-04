@@ -38,4 +38,7 @@
 
     <class name = "fty_common_translation_base">Singleton translation object</class>
 
+    <bin name = "collect_translations.sh" />
+    <bin name = "translations_to_weblate.sh" />
+
 </project>
