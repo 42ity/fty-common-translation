@@ -54,6 +54,8 @@ BuildRequires:  malamute-devel
 BuildRequires:  cxxtools-devel
 BuildRequires:  log4cplus-devel
 BuildRequires:  fty-common-logging-devel
+BuildRequires:  fty-common-devel
+BuildRequires:  openssl-devel
 BuildRequires:  fty-common-mlm-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
@@ -85,6 +87,8 @@ Requires:       malamute-devel
 Requires:       cxxtools-devel
 Requires:       log4cplus-devel
 Requires:       fty-common-logging-devel
+Requires:       fty-common-devel
+Requires:       openssl-devel
 Requires:       fty-common-mlm-devel
 
 %description devel

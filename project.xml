@@ -64,6 +64,15 @@
                 />
         </use>
 
+        <use project = "fty-common" libname = "libfty_common" header="fty_common.h"
+           repository = "https://github.com/42ity/fty-common.git"
+           release = "master" />
+
+        <!-- TODO: Test if openssl is really needed for translations component
+             prerequisites, or would Travis agree to build without it? -->
+        <use project = "openssl" header = "openssl/sha.h" debian_name="libssl-dev"
+            />
+
     </use>
 
     <class name = "fty_common_translation_base">Singleton translation object</class>

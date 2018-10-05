@@ -58,6 +58,7 @@ env:
 
 # Prerequisite packages provided by OS distro and used "as is"
 pkg_deps_prereqs_distro: &pkg_deps_prereqs_distro
+    - libssl-dev
 
 # Prerequisite packages that may be built from source or used from
 # prebuilt packages of that source (usually not from an OS distro)
@@ -69,6 +70,7 @@ pkg_deps_prereqs_source: &pkg_deps_prereqs_source
     - cxxtools-dev
     - log4cplus-dev
     - libfty-common-logging-dev
+    - libfty-common-dev
     - libfty-common-mlm-dev
 
 # NOTE: Our forks are checked out and built without pkg dependencies in use

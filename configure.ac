@@ -766,6 +766,136 @@ dnl END of PKG_CHECK_MODULES and/or direct tests for libfty_common_logging
 dnl END of enabled attempts to search for libfty_common_logging
 
 
+was_fty_common_check_lib_detected=no
+
+search_libfty_common="yes"
+
+AC_ARG_WITH([libfty_common],
+    [
+        AS_HELP_STRING([--with-libfty_common],
+        [yes or no. Optionally specify libfty_common prefix (directory where its include/ and lib/ are located), but that is only used if pkgconfig metadata is not found first])
+    ],
+    [
+        search_libfty_common="yes"
+    ],
+    [
+        search_libfty_common="yes"
+    ])
+AS_CASE([x"${with_libfty_common}"],
+    [xyes], [search_libfty_common="yes"],
+    [xno],  [search_libfty_common="no"])
+
+dnl We do not abort right now, because the maintainer/developer may have
+dnl something particular in mind, e.g. to build just parts of a project.
+AS_IF([test x"${search_libfty_common}" = xno],
+    [AC_MSG_WARN([Required dependency on fty_common was explicitly disabled during configuration by '--with-libfty_common=no'; subsequent full build of fty-common-translation may fail])])
+
+AS_IF([test x"${search_libfty_common}" = xyes], [
+    # Archive previously detected and supplied flags
+    PRE_SEARCH_CFLAGS="${CFLAGS}"
+    PRE_SEARCH_LIBS="${LIBS}"
+
+    found_pkgconfig=""
+    found_linkname=""
+    PKG_CHECK_MODULES([fty_common], [libfty_common >= 0.0.0],
+    [
+        PKGCFG_LIBS_PRIVATE="$PKGCFG_LIBS_PRIVATE $fty_common_LIBS"
+        was_fty_common_check_lib_detected=pkgcfg
+        found_pkgconfig="libfty_common"
+    ],
+    [
+        AC_MSG_WARN([Attribute 'test' is not set on zproject dependency 'fty-common' - please ensure it is set])
+    ])
+
+dnl END of PKG_CHECK_MODULES and/or direct tests for libfty_common
+    AS_CASE(["x${was_fty_common_check_lib_detected}"],
+        [xpkgcfg], [
+                AC_SUBST([pkgconfig_name_libfty_common],[${found_pkgconfig}])
+                CFLAGS="${fty_common_CFLAGS} ${CFLAGS}"
+                LIBS="${fty_common_LIBS} ${LIBS}"
+            ],
+        [xyes], [
+                AC_SUBST([pkgconfig_name_libfty_common],[${found_linkname}])
+                CFLAGS="${fty_common_synthetic_cflags} ${CFLAGS}"
+                LDFLAGS="${fty_common_synthetic_libs} ${LDFLAGS}"
+                LIBS="${fty_common_synthetic_libs} ${LIBS}"
+
+                AC_SUBST([fty_common_CFLAGS],[${fty_common_synthetic_cflags}])
+                AC_SUBST([fty_common_LIBS],[${fty_common_synthetic_libs}])
+            ],
+        [xno], [
+                AC_SUBST([pkgconfig_name_libfty_common],[libfty_common])
+            AC_MSG_ERROR([Cannot find pkg-config metadata for libfty_common 0.0.0 or higher])
+    ])
+])
+dnl END of enabled attempts to search for libfty_common
+
+
+was_openssl_check_lib_detected=no
+
+search_openssl="yes"
+
+AC_ARG_WITH([openssl],
+    [
+        AS_HELP_STRING([--with-openssl],
+        [yes or no. Optionally specify openssl prefix (directory where its include/ and lib/ are located), but that is only used if pkgconfig metadata is not found first])
+    ],
+    [
+        search_openssl="yes"
+    ],
+    [
+        search_openssl="yes"
+    ])
+AS_CASE([x"${with_openssl}"],
+    [xyes], [search_openssl="yes"],
+    [xno],  [search_openssl="no"])
+
+dnl We do not abort right now, because the maintainer/developer may have
+dnl something particular in mind, e.g. to build just parts of a project.
+AS_IF([test x"${search_openssl}" = xno],
+    [AC_MSG_WARN([Required dependency on openssl was explicitly disabled during configuration by '--with-openssl=no'; subsequent full build of fty-common-translation may fail])])
+
+AS_IF([test x"${search_openssl}" = xyes], [
+    # Archive previously detected and supplied flags
+    PRE_SEARCH_CFLAGS="${CFLAGS}"
+    PRE_SEARCH_LIBS="${LIBS}"
+
+    found_pkgconfig=""
+    found_linkname=""
+    PKG_CHECK_MODULES([openssl], [openssl >= 0.0.0],
+    [
+        PKGCFG_LIBS_PRIVATE="$PKGCFG_LIBS_PRIVATE $openssl_LIBS"
+        was_openssl_check_lib_detected=pkgcfg
+        found_pkgconfig="openssl"
+    ],
+    [
+        AC_MSG_WARN([Attribute 'test' is not set on zproject dependency 'openssl' - please ensure it is set])
+    ])
+
+dnl END of PKG_CHECK_MODULES and/or direct tests for openssl
+    AS_CASE(["x${was_openssl_check_lib_detected}"],
+        [xpkgcfg], [
+                AC_SUBST([pkgconfig_name_openssl],[${found_pkgconfig}])
+                CFLAGS="${openssl_CFLAGS} ${CFLAGS}"
+                LIBS="${openssl_LIBS} ${LIBS}"
+            ],
+        [xyes], [
+                AC_SUBST([pkgconfig_name_openssl],[${found_linkname}])
+                CFLAGS="${openssl_synthetic_cflags} ${CFLAGS}"
+                LDFLAGS="${openssl_synthetic_libs} ${LDFLAGS}"
+                LIBS="${openssl_synthetic_libs} ${LIBS}"
+
+                AC_SUBST([openssl_CFLAGS],[${openssl_synthetic_cflags}])
+                AC_SUBST([openssl_LIBS],[${openssl_synthetic_libs}])
+            ],
+        [xno], [
+                AC_SUBST([pkgconfig_name_openssl],[openssl])
+            AC_MSG_ERROR([Cannot find pkg-config metadata for openssl 0.0.0 or higher])
+    ])
+])
+dnl END of enabled attempts to search for openssl
+
+
 was_fty_common_mlm_check_lib_detected=no
 
 search_libfty_common_mlm="yes"
