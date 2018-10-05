@@ -6,9 +6,15 @@ Maintainer: fty-common-translation Developers <eatonipcopensource@eaton.com>
 Architecture: any
 Build-Depends: debhelper (>= 9),
     pkg-config,
+    libsodium-dev,
     libzmq3-dev,
     libczmq-dev,
     libmlm-dev,
+    libcxxtools-dev,
+    liblog4cplus-dev,
+    libfty-common-logging-dev,
+    libfty-common-dev,
+    libssl-dev,
     libfty-common-mlm-dev,
     asciidoc-base | asciidoc, xmlto,
     dh-autoreconf

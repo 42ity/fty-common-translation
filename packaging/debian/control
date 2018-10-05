@@ -24,9 +24,15 @@ Maintainer:     fty-common-translation Developers <eatonipcopensource@eaton.com>
 Standards-Version: 4.0.1.0
 Build-Depends: debhelper (>= 9),
     pkg-config,
+    libsodium-dev,
     libzmq3-dev,
     libczmq-dev,
     libmlm-dev,
+    libcxxtools-dev,
+    liblog4cplus-dev,
+    libfty-common-logging-dev,
+    libfty-common-dev,
+    libssl-dev,
     libfty-common-mlm-dev,
     asciidoc-base | asciidoc, xmlto,
     dh-autoreconf
@@ -43,9 +49,15 @@ Architecture: any
 Section: libdevel
 Depends:
     ${misc:Depends},
+    libsodium-dev,
     libzmq3-dev,
     libczmq-dev,
     libmlm-dev,
+    libcxxtools-dev,
+    liblog4cplus-dev,
+    libfty-common-logging-dev,
+    libfty-common-dev,
+    libssl-dev,
     libfty-common-mlm-dev,
     libfty-common-translation1 (= ${binary:Version})
 Description: fty-common-translation development tools

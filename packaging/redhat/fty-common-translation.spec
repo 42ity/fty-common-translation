@@ -47,9 +47,15 @@ BuildRequires:  libtool
 BuildRequires:  pkgconfig
 BuildRequires:  xmlto
 BuildRequires:  gcc-c++
+BuildRequires:  libsodium-devel
 BuildRequires:  zeromq-devel
 BuildRequires:  czmq-devel
 BuildRequires:  malamute-devel
+BuildRequires:  cxxtools-devel
+BuildRequires:  log4cplus-devel
+BuildRequires:  fty-common-logging-devel
+BuildRequires:  fty-common-devel
+BuildRequires:  openssl-devel
 BuildRequires:  fty-common-mlm-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
@@ -74,9 +80,15 @@ This package contains shared library for fty-common-translation: provides common
 Summary:        provides common translation library
 Group:          System/Libraries
 Requires:       libfty_common_translation1 = %{version}
+Requires:       libsodium-devel
 Requires:       zeromq-devel
 Requires:       czmq-devel
 Requires:       malamute-devel
+Requires:       cxxtools-devel
+Requires:       log4cplus-devel
+Requires:       fty-common-logging-devel
+Requires:       fty-common-devel
+Requires:       openssl-devel
 Requires:       fty-common-mlm-devel
 
 %description devel
