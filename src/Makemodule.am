@@ -55,6 +55,11 @@ src_fty_common_translation_selftest_LDADD = ${program_libs}
 src_fty_common_translation_selftest_SOURCES = src/fty_common_translation_selftest.cc
 endif #ENABLE_FTY_COMMON_TRANSLATION_SELFTEST
 
+# Install data into /usr/local/bin
+dist_bin_SCRIPTS = \
+    collect_translations.sh \
+    translations_to_weblate.sh
+
 # define custom target for all products of /src
 src: \
 		src/fty_common_translation_selftest \
