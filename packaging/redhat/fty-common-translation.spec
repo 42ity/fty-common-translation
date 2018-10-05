@@ -107,5 +107,10 @@ make install DESTDIR=%{buildroot} %{?_smp_mflags}
 find %{buildroot} -name '*.a' | xargs rm -f
 find %{buildroot} -name '*.la' | xargs rm -f
 
+%files
+%defattr(-,root,root)
+%doc README.md
+%{_bindir}/collect_translations.sh
+%{_bindir}/translations_to_weblate.sh
 
 %changelog

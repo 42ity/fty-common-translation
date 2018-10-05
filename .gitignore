@@ -1,6 +1,9 @@
 # This is a skeleton created by zproject.
 # You can add hand-written code here.
+### Note: Customized after generation; take care upon regens
+
 save.xml
+
 # Object files
 *.o
 *.so
@@ -62,7 +65,6 @@ src/test-suite.log
 src/.dirstamp
 
 # CMake cache
-CMakeLists.txt
 CMakeCache.txt
 CMakeFiles/
 CTestTestfile.cmake
@@ -71,6 +73,11 @@ compile_commands.json
 DartConfiguration.tcl
 install_manifest.txt
 Testing/
+
+# CMake in general
+builds/cmake/
+CMake*
+*.cmake
 
 # Repositories downloaded by CI integration scripts
 tmp-deps/
