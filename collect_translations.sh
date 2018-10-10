@@ -20,11 +20,11 @@ grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp"
 echo "-== CLEAN UP ==-"
 rm "${output}.ttsl"
 if (grep "[^\\]\"" "${output}.tsl") ; then
-    echo "ERROR IN ${output}.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK"
+    echo "-== ERROR IN ${output}.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK ==-"
     exit 1
 fi
 if (grep "[^\\]\"" "${output}_lua.tsl") ; then
-    echo "ERROR IN ${output}_lua.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK"
+    echo "-== ERROR IN ${output}_lua.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK ==-"
     exit 1
 fi
-echo "DONE, OUTPUT PUT TO ${output}.tsl AND ${output}_lua.tsl"
+echo "-== DONE, OUTPUT PUT TO ${output}.tsl AND ${output}_lua.tsl ==-"
