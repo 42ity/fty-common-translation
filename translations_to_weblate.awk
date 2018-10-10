@@ -1,25 +1,25 @@
 BEGIN               { print "{"; }
 /^TRANSLATE_LUA/    {
-                        line=$0;
-                        en_text=line;
-                        sub("TRANSLATE_LUA *\\(", "", en_text);
-                        sub(")$", "", en_text);
+                        LINE=$0;
+                        EN_TEXT=LINE;
+                        sub("TRANSLATE_LUA *\\(", "", EN_TEXT);
+                        sub(")$", "", EN_TEXT);
                         if (NR==TNR)
-                            {print "\t\""line"\": \""en_text"\"";}
+                            {print "\t\""LINE"\": \""EN_TEXT"\"";}
                         else
-                            {print "\t\""line"\": \""en_text"\",";}
+                            {print "\t\""LINE"\": \""EN_TEXT"\",";}
                         next;
                     }
                     {
-                        line=$0;
-                        arg_count=1;
-                        while (sub("% ?[^' ]", "$var"arg_count"$", line) == 1) {
-                            arg_count+=1;
+                        LINE=$0;
+                        ARG_COUNT=1;
+                        while (sub("% ?[^' ]", "$var"ARG_COUNT"$", LINE) == 1) {
+                            ARG_COUNT+=1;
                         }
-                        en_text=line;
+                        EN_TEXT=LINE;
                         if (NR==TNR)
-                            {print "\t\""line"\": \""en_text"\"";}
+                            {print "\t\""LINE"\": \""EN_TEXT"\"";}
                         else
-                            {print "\t\""line"\": \""en_text"\",";}
+                            {print "\t\""LINE"\": \""EN_TEXT"\",";}
                     }
 END                 { print "}" }
