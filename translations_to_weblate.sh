@@ -8,8 +8,8 @@ fi
 if [[ ! -z $2 ]] ; then
     output=$2
 fi
-echo "CHANGING FORMAT TO WEBLATE (json)"
+echo "-== CHANGING FORMAT TO WEBLATE (json) ==-"
 cat ${target} > weblate_translations.tmp
 awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" -f "${MY_PATH}/translations_to_weblate.awk" weblate_translations.tmp >"${output}"
 rm -f weblate_translations.tmp
-echo "DONE, OUTPUT PUT TO ${output}"
+echo "-== DONE, OUTPUT PUT TO ${output} ==-"
