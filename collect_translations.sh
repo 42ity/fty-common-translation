@@ -1,9 +1,9 @@
 #!/bin/bash
 TARGET='./'
 OUTPUT='all'
-if [[ ! -z $1 ]] ; then
-    TARGET=$1
-    OUTPUT=$1
+if [[ ! -z "$1" ]] ; then
+    TARGET="$1"
+    OUTPUT="$1"
 fi
 
 # .tsl = translation string list

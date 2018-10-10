@@ -1,12 +1,12 @@
 #!/bin/bash
-MY_PATH="`dirname \"$0\"`"
+MY_PATH="$(dirname "$0")"
 TARGET='*.tsl'
 OUTPUT='BE_weblate.json'
-if [[ ! -z $1 ]] ; then
-    TARGET=$1
+if [[ ! -z "$1" ]] ; then
+    TARGET="$1"
 fi
-if [[ ! -z $2 ]] ; then
-    OUTPUT=$2
+if [[ ! -z "$2" ]] ; then
+    OUTPUT="$2"
 fi
 echo "=== CHANGING FORMAT TO WEBLATE (json) ==="
 cat ${TARGET} > weblate_translations.tmp
