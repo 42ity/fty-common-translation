@@ -11,7 +11,6 @@ echo "-== COLLECTING TRANSLATIONS ==-"
 # gather first argument of TRANSLATE_ME
 echo "" >"${output}.ttsl"
 for files in $(grep -rsIl --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${target}"); do
-    echo "Searching ${files}"
     tr -d '\n' <"${files}" | sed 's/#define *TRANSLATE_ME//g;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' >>"${output}.ttsl"
     echo "" >>"${output}.ttsl"
 done
