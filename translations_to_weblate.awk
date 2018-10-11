@@ -13,7 +13,7 @@ BEGIN               { print "{"; }
                     {
                         LINE=$0;
                         ARG_COUNT=1;
-                        while (sub("% ?[^' ]", "$var"ARG_COUNT"$", LINE) == 1) {
+                        while (sub("% ?[^' ]", "{{var"ARG_COUNT"}}", LINE) == 1) {
                             ARG_COUNT+=1;
                         }
                         EN_TEXT=LINE;
