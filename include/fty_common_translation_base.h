@@ -23,17 +23,94 @@
 #define FTY_COMMON_TRANSLATION_BASE_H_INCLUDED
 
 #ifdef __cplusplus
+#include <climits>
+#else
+#include <limits.h>
+#endif
+
+typedef struct {
+    char *language;
+} TRANSLATION_CONFIGURATION;
+
+typedef enum {
+    TE_OK = 0,
+    TE_Undefined = INT_MIN,
+    TE_InvalidFile,
+    TE_EmptyFile,
+    TE_CorruptedLine,
+    TE_LanguageNotLoaded,
+    TE_TranslationNotFound,
+    TE_NotFound
+} TRANSLATION_CRETVALS;
+
+#ifdef __cplusplus
+
+#include <string>
+#include <vector>
+
+class Translation {
+    public:
+        static Translation& getInstance ()
+        {
+            static Translation instance;
+            return instance;
+        }
+    private:
+        const std::string default_language_="en_US";
+        // language order stored for getting current language from language_list_ordering
+        size_t language_order_;
+        // preloaded translation strings in map: "key" -> language list [use language_order as a key]
+        std::map<std::string, std::vector<std::string>> language_translations_;
+        // pairing language string to index with default en_US: "en_US" -> 0, ...
+        std::map<std::string, size_t> language_list_ordering_;
+        // store agent name for malamute communication
+        std::string agent_name_;
+        // store prefix for translation files
+        std::string file_prefix_;
+        // store path to translation files
+        std::string path_;
+        // avoid use of the following procedures/functions as this should be a singleton
+        Translation ();
+        ~Translation ();
+        // load language to structures, throws errors in case of failure
+        void loadLanguage (const std::string language);
+        // read string from json
+        std::string readString(const std::string &line, size_t &start_pos, size_t &end_pos);
+        // get translated text inner function
+        std::string getTranslatedText (const size_t order, const std::string &json);
+    public:
+        // singleton, deleted functions should be public for better error handling
+        Translation (const Translation&) = delete;
+        Translation& operator= (const Translation&) = delete;
+        // prepare configuration
+        void configure (const std::string agent_name, const std::string path, const std::string file_prefix);
+        // change default used language
+        void changeLanguage (const std::string language);
+        // get translated text from selected language
+        std::string getTranslatedText (const std::string &json);
+        std::string getTranslatedText (const TRANSLATION_CONFIGURATION &conf, const std::string &json);
+        class InvalidFileException {};
+        class EmptyFileException {};
+        class CorruptedLineException {};
+        class LanguageNotLoadedException {};
+        class TranslationNotFoundException {};
+        class NotFoundException {};
+};
+
 extern "C" {
 #endif
 
-//  @interface
-//  Create a new fty_common_translation_base
-FTY_COMMON_TRANSLATION_EXPORT fty_common_translation_base_t *
-    fty_common_translation_base_new (void);
+// Wrapper for initialization
+int translation_initialize (const char *agent_name, const char *path, const char *file_prefix);
 
-//  Destroy the fty_common_translation_base
-FTY_COMMON_TRANSLATION_EXPORT void
-    fty_common_translation_base_destroy (fty_common_translation_base_t **self_p);
+// Wrapper for changing language
+int translation_change_language (const char *language);
+
+// Wrapper for getting translated text
+char *translation_get_translated_text (const char *json);
+
+// Wrapper for getting translated text
+char *translation_get_translated_text_language (const TRANSLATION_CONFIGURATION *conf, const char *json);
 
 //  Self test of this class
 FTY_COMMON_TRANSLATION_EXPORT void
