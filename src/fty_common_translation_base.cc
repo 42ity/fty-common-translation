@@ -377,7 +377,7 @@ char *translation_get_translated_text (const char *json) {
     }
     try {
         std::string tmp = Translation::getInstance ().getTranslatedText (json);
-        char *retval = (char *) malloc (sizeof (char) * tmp.length ());
+        char *retval = (char *) malloc (sizeof (char) * tmp.length () + 1);
         if (NULL == retval) {
             log_error ("Unable to allocate memory for translation C interface");
             return NULL;
@@ -403,7 +403,7 @@ char *translation_get_translated_text_language (const TRANSLATION_CONFIGURATION 
     }
     try {
         std::string tmp = Translation::getInstance ().getTranslatedText (*conf, json);
-        char *retval = (char *) malloc (sizeof (char) * tmp.length ());
+        char *retval = (char *) malloc (sizeof (char) * tmp.length () + 1);
         if (NULL == retval) {
             log_error ("Unable to allocate memory for translation C interface");
             return NULL;
@@ -438,6 +438,7 @@ fty_common_translation_base_test (bool verbose)
     // most of the time just test C interface as it uses C++ one
     try {
         std::cout << " * fty_common_translation_base: " << std::endl;
+        char *res;
         const char *path = SELFTEST_DIR_RW;
         const char *file_prefix = "test_";
         const char *lang1 = "en_US"; // default language, do not change
@@ -452,33 +453,41 @@ fty_common_translation_base_test (bool verbose)
         std::string cmd = std::string ("/bin/rm -f \'") + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
         assert (TE_InvalidFile == translation_initialize (agent_name, path, file_prefix));
-        cmd = std::string ("/bin/cp -p \'" SELFTEST_DIR_RO "/") + file_prefix + empty_lang + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
+        cmd = std::string ("/bin/cp --no-preserve=mode \'" SELFTEST_DIR_RO "/") + file_prefix + empty_lang + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
         assert (TE_EmptyFile == translation_initialize (agent_name, path, file_prefix));
-        cmd = std::string ("/bin/cp -p \'" SELFTEST_DIR_RO "/") + file_prefix + corrupted_lang + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
+        cmd = std::string ("/bin/cp --no-preserve=mode \'" SELFTEST_DIR_RO "/") + file_prefix + corrupted_lang + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
         assert (TE_CorruptedLine == translation_initialize (agent_name, path, file_prefix));
         // TE_Undefined shouldn't be returned under normal conditions
-        cmd = std::string ("/bin/cp -p \'" SELFTEST_DIR_RO "/") + file_prefix + lang1 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
+        cmd = std::string ("/bin/cp --no-preserve=mode \'" SELFTEST_DIR_RO "/") + file_prefix + lang1 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
         assert (TE_OK == translation_initialize (agent_name, path, file_prefix));
 
         // test case 1 - loading language
-        cmd = std::string ("/bin/cp -p \'" SELFTEST_DIR_RO "/") + file_prefix + lang1 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
+        cmd = std::string ("/bin/cp --no-preserve=mode \'" SELFTEST_DIR_RO "/") + file_prefix + lang1 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang1 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
-        cmd = std::string ("/bin/cp -p \'" SELFTEST_DIR_RO "/") + file_prefix + lang2 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang2 + FILE_EXTENSION "\'";
+        cmd = std::string ("/bin/cp --no-preserve=mode \'" SELFTEST_DIR_RO "/") + file_prefix + lang2 + FILE_EXTENSION "\' \'" + path + "/" + file_prefix + lang2 + FILE_EXTENSION "\'";
         assert (0 == system (cmd.c_str ()));
         const char *str_src = "{ \"key\" : \"first\"}";
         const char *str_exp_en = "first";
         const char *str_exp_cz = "první";
         assert (TE_OK == translation_change_language (lang1));
-        assert (strcmp (translation_get_translated_text (str_src), str_exp_en) == 0);
+        res = translation_get_translated_text (str_src);
+        assert (strcmp (res, str_exp_en) == 0);
+        free (res);
         assert (TE_OK == translation_change_language (lang2));
-        assert (strcmp (translation_get_translated_text (str_src), str_exp_cz) == 0);
+        res = translation_get_translated_text (str_src);
+        assert (strcmp (res, str_exp_cz) == 0);
+        free (res);
         assert (TE_InvalidFile == translation_change_language (lang3));
-        assert (strcmp (translation_get_translated_text (str_src), str_exp_cz) == 0);
+        res = translation_get_translated_text (str_src);
+        assert (strcmp (res, str_exp_cz) == 0);
+        free (res);
         assert (TE_OK == translation_change_language (lang1));
-        assert (strcmp (translation_get_translated_text (str_src), str_exp_en) == 0);
+        res = translation_get_translated_text (str_src);
+        assert (strcmp (res, str_exp_en) == 0);
+        free (res);
 
         // test case 2 - failed strings
         TRANSLATION_CONFIGURATION config = {(char *)"cs_CZ"};
@@ -501,7 +510,7 @@ fty_common_translation_base_test (bool verbose)
         const char *str8_src = "{ \"key\" : \"first\"}";
         const char *str8_exp_en = "first";
         const char *str8_exp_cz = "první";
-        char *res = translation_get_translated_text (str8_src);
+        res = translation_get_translated_text (str8_src);
         assert (strcmp (res, str8_exp_en) == 0);
         free (res);
         res = translation_get_translated_text (str8_src);
@@ -520,7 +529,7 @@ fty_common_translation_base_test (bool verbose)
         assert (strcmp (res, str9_exp_en) == 0);
         free (res);
         res = translation_get_translated_text_language (&config, str9_src);
-        assert (strcmp (translation_get_translated_text_language (&config, str9_src), str9_exp_cz) == 0);
+        assert (strcmp (res, str9_exp_cz) == 0);
         free (res);
         const char *str10_src = "{ \"key\" : \"third\", \"variables\" : { \"variable\" : \"var1\"}}";
         const char *str10_exp = "a string with a var1";
@@ -557,6 +566,7 @@ fty_common_translation_base_test (bool verbose)
         const char *str15_exp = "outer string with middle string with innermost string and second innermost string";
         res = translation_get_translated_text (str15_src);
         assert (strcmp (res, str15_exp) == 0);
+        free (res);
         const char *str16_src = " {\"key\":\"eleventh\",\"variables\":{\"var1\":{\"key\":\"ninth\",\"variables\":{\"variable\":{\"key\":\"eight\"}}},\"var2\":{\"key\":\"tenth\"}}}} ";
         const char *str16_exp = "outer string with middle string with innermost string and second innermost string";
         res = translation_get_translated_text (str16_src);
