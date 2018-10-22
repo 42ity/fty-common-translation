@@ -43,6 +43,14 @@ typedef enum {
     TE_NotFound
 } TRANSLATION_CRETVALS;
 
+typedef enum {
+    JT_Invalid = INT_MIN,
+    JT_None,
+    JT_String = 0,
+    JT_Object,
+    JT_Object_End
+} JSON_TYPE;
+
 #ifdef __cplusplus
 
 #include <string>
@@ -73,9 +81,13 @@ class Translation {
         Translation ();
         ~Translation ();
         // load language to structures, throws errors in case of failure
-        void loadLanguage (const std::string language);
+        void loadLanguage (const std::string &language);
+        // determine start and type of next object in json line
+        JSON_TYPE getNextObject (const std::string &line, size_t &start_pos);
         // read string from json
-        std::string readString(const std::string &line, size_t &start_pos, size_t &end_pos);
+        std::string readString (const std::string &line, size_t &start_pos, size_t &end_pos);
+        // read object from json
+        std::string readObject (const std::string &line, size_t &start_pos, size_t &end_pos);
         // get translated text inner function
         std::string getTranslatedText (const size_t order, const std::string &json);
     public:
@@ -83,9 +95,9 @@ class Translation {
         Translation (const Translation&) = delete;
         Translation& operator= (const Translation&) = delete;
         // prepare configuration
-        void configure (const std::string agent_name, const std::string path, const std::string file_prefix);
+        void configure (const std::string &agent_name, const std::string &path, const std::string &file_prefix);
         // change default used language
-        void changeLanguage (const std::string language);
+        void changeLanguage (const std::string &language);
         // get translated text from selected language
         std::string getTranslatedText (const std::string &json);
         std::string getTranslatedText (const TRANSLATION_CONFIGURATION &conf, const std::string &json);

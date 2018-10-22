@@ -4,13 +4,9 @@
 ################################################################################
 nobase_include_HEADERS = \
     fty_common_translation.h \
+    fty_common_translation_base.h \
     fty_common_translation_library.h
 
-if ENABLE_DRAFTS
-nobase_include_HEADERS += \
-    fty_common_translation_base.h
-
-endif
 
 
 ################################################################################

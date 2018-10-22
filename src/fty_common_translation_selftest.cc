@@ -39,10 +39,8 @@ typedef struct {
 
 static test_item_t
 all_tests [] = {
-#ifdef FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
-// Tests for draft public classes:
-    { "fty_common_translation_base", fty_common_translation_base_test, false, true, NULL },
-#endif // FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
+// Tests for stable public classes:
+    { "fty_common_translation_base", fty_common_translation_base_test, true, true, NULL },
     {NULL, NULL, 0, 0, NULL}          //  Sentinel
 };
 
