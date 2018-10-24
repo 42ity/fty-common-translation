@@ -311,7 +311,7 @@ Translation::Translation ()
     , agent_name_ ("") { }
 
 
-Translation::~Translation () { };
+Translation::~Translation () { }
 
 
 void Translation::configure (const std::string &agent_name, const std::string &path, const std::string &file_prefix) {
