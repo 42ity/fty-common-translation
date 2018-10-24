@@ -27,6 +27,16 @@
     <version major = "1" minor = "0" patch = "0" />
     <abi current = "1" revision = "0" age = "0" />
 
+    <use project = "fty-common-logging" libname = "libfty_common_logging" header="fty_log.h"
+        repository = "https://github.com/42ity/fty-common-logging.git"
+        release = "master"
+        test = "fty_common_logging_selftest" >
+        <use project = "log4cplus" header = "log4cplus/logger.h" test = "appender_test"
+            repository = "https://github.com/42ity/log4cplus.git"
+            release = "1.1.2-FTY-master"
+            />
+    </use>
+
     <use project = "fty-common-mlm" libname = "libfty_common_mlm" header="fty_common_mlm.h"
         repository = "https://github.com/42ity/fty-common-mlm.git"
         test = "fty_commmon_mlm_selftest" >
@@ -75,7 +85,7 @@
 
     </use>
 
-    <class name = "fty_common_translation_base">Singleton translation object</class>
+    <class name = "fty_common_translation_base" selftest = "1" state = "stable">Singleton translation object</class>
 
     <bin name = "collect_translations.sh" />
     <bin name = "translations_to_weblate.sh" />

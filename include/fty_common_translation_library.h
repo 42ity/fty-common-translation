@@ -30,6 +30,7 @@
 //  Set up environment for the application
 
 //  External dependencies
+#include <fty_log.h>
 #include <fty_common_mlm.h>
 
 //  FTY_COMMON_TRANSLATION version macros for compile-time API detection
@@ -90,23 +91,14 @@
 #   endif
 #endif
 
-//  Project has no stable classes, so we build the draft API
-#undef  FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
-#define FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
-
 //  Opaque class structures to allow forward references
 //  These classes are stable or legacy and built in all releases
-//  Draft classes are by default not built in stable releases
-#ifdef FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
 typedef struct _fty_common_translation_base_t fty_common_translation_base_t;
 #define FTY_COMMON_TRANSLATION_BASE_T_DEFINED
-#endif // FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
 
 
 //  Public classes, each with its own header file
-#ifdef FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
 #include "fty_common_translation_base.h"
-#endif // FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
 
 #ifdef FTY_COMMON_TRANSLATION_BUILD_DRAFT_API
 

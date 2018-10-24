@@ -1,0 +1,13 @@
+{
+	"first": "first",
+    "second" : "second",
+    "third" : "a string with a {{variable}}",
+    "fourth" : "a string with {{multiple}} variables {{nextvar}}",
+    "fifth" :"reverse order string with {{var1}} and {{var2}} variables",
+    "sixth" :"multiple instances of {{variable}}, {{variable}}, {{variable}}",
+    "seventh" : "string without {{variable}} replacement",
+    "eight" : "innermost string",
+    "ninth" : "middle string with {{variable}}",
+    "tenth" : "second innermost string",
+    "eleventh" : "outer string with {{var1}} and {{var2}}"
+}
