@@ -18,8 +18,11 @@ fi
 
 echo "=== CHANGING FORMAT TO WEBLATE (json) ==="
 RES=0
-cat "${TARGET}" | sort | uniq > weblate_translations.tmp && \
-awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" -f "${MY_PATH}/translations_to_weblate.awk" weblate_translations.tmp >"${OUTPUT}" || RES=$?
+# Note: TARGET may include wildcards, so should not be quoted
+cat ${TARGET} | sort | uniq > weblate_translations.tmp && \
+awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
+    -f "${MY_PATH}/translations_to_weblate.awk" \
+    weblate_translations.tmp >"${OUTPUT}" || RES=$?
 rm -f weblate_translations.tmp
 
 echo "=== DONE, OUTPUT PUT TO ${OUTPUT}, exit-code is $RES ==="
