@@ -24,10 +24,11 @@ done
 sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq >"${OUTPUT}.tsl"
 # gather whole content of TRANSLATE_LUA
 # search for all TRANSLATE_LUA strings, remove defines
-# sed 's/^.*\(TRANSLATE_LUA *(\)/\1/' - remove start of the line up to TRANSLATE_LUA
+# sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' - ensure all TRANSLATE_LUA strings are properly located
+# tail -n +2 - first line is just buzz, usually licence and includes, all the rest lines are content of TRANSLATE_LUA
 # sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' - \x27 is ', checking that TRANSLATE_LUA ends with )" or )\" or )' or )\'
 # then also remove duplicates
-grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} | grep -v '#define TRANSLATE_LUA *(' | sed 's/^.*\(TRANSLATE_LUA *(\)/\1/' | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' | sort | uniq >"${OUTPUT}_lua.tsl"
+grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} | grep -v '#define TRANSLATE_LUA *(' | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' | grep "TRANSLATE_LUA" | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' | sort | uniq >"${OUTPUT}_lua.tsl"
 echo "=== CLEAN UP ==="
 rm "${OUTPUT}.ttsl"
 if (grep "[^\\]\"" "${OUTPUT}.tsl") ; then
