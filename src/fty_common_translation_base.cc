@@ -248,6 +248,17 @@ std::string Translation::getTranslatedText (const size_t order, const std::strin
 }
 
 
+void replaceEscapedChars (std::string &target) {
+    size_t n = 0;
+    std::string key = "\\n";
+    std::string value = "\n";
+    while ( ( n = target.find ( key, n ) ) != std::string::npos ) {
+        target.replace ( n, key.size (), value );
+        n += value.size ();
+    }
+}
+
+
 void Translation::loadLanguage (const std::string &language) {
     std::string filename = path_ + file_prefix_ + language + FILE_EXTENSION;
     log_debug ("Loading translation file '%s'", filename.c_str ());
@@ -273,8 +284,10 @@ void Translation::loadLanguage (const std::string &language) {
             size_t begin = 0, end = 0;
             // find key
             key = readString (line, begin, end);
+            replaceEscapedChars (key);
             begin = end + 1;
             value = readString (line, begin, end);
+            replaceEscapedChars (value);
             log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
             language_translations_[key].push_back (value);
         }
@@ -291,8 +304,6 @@ void Translation::loadLanguage (const std::string &language) {
         throw InvalidFileException ();
     }
     /* if you'd ever try to debug this and wonder about content of loaded translations, this might come handy
-    std::cout << "order=" << order << " json=" << json << std::endl;
-    std::cout << "key='" << key << "' value='" << value << "'" << std::endl;
     std::cout << "Content of translations: ";
     for (auto x : language_translations_) {
     std::cout << "[" << x.first << "]=>{";
@@ -571,6 +582,11 @@ fty_common_translation_base_test (bool verbose)
         const char *str16_exp = "outer string with middle string with innermost string and second innermost string";
         res = translation_get_translated_text (str16_src);
         assert (strcmp (res, str16_exp) == 0);
+        free (res);
+        const char *str17_src = " {\"key\":\"twelfth\nthirteenth\" }";
+        const char *str17_exp = "string\nwith\nnewlines";
+        res = translation_get_translated_text (str17_src);
+        assert (strcmp (res, str17_exp) == 0);
         free (res);
     } catch (...) {
         log_error ("An exception was caught");

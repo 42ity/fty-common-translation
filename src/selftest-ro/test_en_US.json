@@ -9,5 +9,6 @@
     "eight" : "innermost string",
     "ninth" : "middle string with {{variable}}",
     "tenth" : "second innermost string",
-    "eleventh" : "outer string with {{var1}} and {{var2}}"
+    "eleventh" : "outer string with {{var1}} and {{var2}}",
+    "twelfth\nthirteenth" : "string\nwith\nnewlines"
 }
