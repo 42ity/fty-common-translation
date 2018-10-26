@@ -333,6 +333,7 @@ void Translation::configure (const std::string &agent_name, const std::string &p
     }
     file_prefix_ = file_prefix;
     loadLanguage (default_language_);
+    language_order_ = 0;
 }
 
 
