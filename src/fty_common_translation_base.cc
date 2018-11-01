@@ -62,76 +62,6 @@ static inline void trim (std::string &s) {
     rtrim (s);
 }
 
-
-JSON_TYPE Translation::getNextObject (const std::string &line, size_t &start_pos) {
-    start_pos = line.find_first_not_of ("\t :,", start_pos);
-    if (start_pos == std::string::npos) {
-        return JT_None;
-    }
-    switch (line.at (start_pos)) {
-        case '{':
-            return JT_Object;
-            break;
-        case '}':
-            return JT_Object_End;
-            break;
-        case '"':
-            return JT_String;
-            break;
-        default:
-            return JT_Invalid;
-            break;
-    }
-}
-
-
-std::string Translation::readObject (const std::string &line, size_t &start_pos, size_t &end_pos) {
-    size_t temp = 0;
-    end_pos = 0;
-    start_pos = line.find_first_of ('{', start_pos);
-    if (std::string::npos == start_pos) {
-        throw NotFoundException ();
-    }
-    int count = 1;
-    temp = start_pos + 1;
-    while (end_pos == 0) {
-        temp = line.find_first_of ("{}", temp + 1); // always searching at pos > 0
-        if (std::string::npos == temp) {
-            throw CorruptedLineException ();
-        } else if (line.at (temp) == '{') {
-            ++count;
-        } else {
-            --count; // closing curly bracket
-        }
-        if (count == 0) {
-            end_pos = temp;
-        }
-    }
-    return line.substr (start_pos, end_pos - start_pos + 1);
-}
-
-
-std::string Translation::readString (const std::string &line, size_t &start_pos, size_t &end_pos) {
-    size_t temp = 0;
-    end_pos = 0;
-    start_pos = line.find_first_of ('"', start_pos);
-    if (std::string::npos == start_pos) {
-        throw NotFoundException ();
-    }
-    temp = start_pos + 1;
-    while (end_pos == 0) {
-        temp = line.find_first_of ('"', temp + 1); // always searching at pos > 0
-        if (std::string::npos == temp) {
-            throw CorruptedLineException ();
-        }
-        if (line[temp - 1] != '\\') {
-            end_pos = temp;
-        }
-    }
-    return line.substr (start_pos + 1, end_pos - start_pos - 1);
-}
-
-
 std::string Translation::getTranslatedText (const std::string &json) {
     return getTranslatedText (language_order_, json);
 }
@@ -159,14 +89,14 @@ std::string Translation::getTranslatedText (const size_t order, const std::strin
         throw CorruptedLineException ();
     }
     ++begin;
-    if (getNextObject (json, begin) == JT_String) {
-        key = readString (json, begin, end);
+    if (JSON::getNextObject (json, begin) == JT_String) {
+        key = JSON::readString (json, begin, end);
     } else {
         throw CorruptedLineException ();
     }
     begin = end + 1;
-    if (getNextObject (json, begin) == JT_String) {
-        value = readString (json, begin, end);
+    if (JSON::getNextObject (json, begin) == JT_String) {
+        value = JSON::readString (json, begin, end);
     } else {
         throw CorruptedLineException ();
     }
@@ -190,24 +120,24 @@ std::string Translation::getTranslatedText (const size_t order, const std::strin
     }
     // load variables if present
     begin = end + 1;
-    if (getNextObject (json, begin) == JT_String) {
-        key = readString (json, begin, end);
+    if (JSON::getNextObject (json, begin) == JT_String) {
+        key = JSON::readString (json, begin, end);
         // check for "variables" keyword
         if (json.find (VARIABLES, begin) == std::string::npos) {
             throw CorruptedLineException ();
         }
         // "variables" must contain object
         begin = end + 1;
-        if (getNextObject (json, begin) != JT_Object) {
+        if (JSON::getNextObject (json, begin) != JT_Object) {
             throw CorruptedLineException ();
         }
         end = begin; // no need to add extra +1, as it's done in the loop
         while (true) {
             bool done = false;
             begin = end + 1;
-            switch (getNextObject (json, begin)) {
+            switch (JSON::getNextObject (json, begin)) {
                 case JT_String:
-                    key = readString (json, begin, end);
+                    key = JSON::readString (json, begin, end);
                     break;
                 case JT_None:
                 case JT_Object_End:
@@ -224,14 +154,14 @@ std::string Translation::getTranslatedText (const size_t order, const std::strin
                 break;
             key = "{{" + key + "}}";
             begin = end + 1;
-            switch (getNextObject (json, begin)) {
+            switch (JSON::getNextObject (json, begin)) {
                 case JT_String:
                     // strings are direct values
-                    value = readString (json, begin, end);
+                    value = JSON::readString (json, begin, end);
                     break;
                 case JT_Object:
                     // objects may contain translations or special variables
-                    value = getTranslatedText (order, readObject (json, begin, end)) ;
+                    value = getTranslatedText (order, JSON::readObject (json, begin, end)) ;
                     break;
                 default:
                     throw CorruptedLineException ();
@@ -283,10 +213,10 @@ void Translation::loadLanguage (const std::string &language) {
             std::string key, value;
             size_t begin = 0, end = 0;
             // find key
-            key = readString (line, begin, end);
+            key = JSON::readString (line, begin, end);
             replaceEscapedChars (key);
             begin = end + 1;
-            value = readString (line, begin, end);
+            value = JSON::readString (line, begin, end);
             replaceEscapedChars (value);
             log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
             language_translations_[key].push_back (value);
@@ -360,6 +290,8 @@ int translation_initialize (const char *agent_name, const char *path, const char
         return TE_EmptyFile;
     } catch (Translation::CorruptedLineException &e) {
         return TE_CorruptedLine;
+    } catch (JSON::CorruptedLineException &e) {
+        return TE_CorruptedLine;
     } catch (...) {
         return TE_Undefined;
     };
@@ -375,6 +307,8 @@ int translation_change_language (const char *language) {
     } catch (Translation::EmptyFileException &e) {
         return TE_EmptyFile;
     } catch (Translation::CorruptedLineException &e) {
+        return TE_CorruptedLine;
+    } catch (JSON::CorruptedLineException &e) {
         return TE_CorruptedLine;
     } catch (...) {
         return TE_Undefined;
@@ -402,6 +336,9 @@ char *translation_get_translated_text (const char *json) {
     } catch (Translation::CorruptedLineException &e) {
         log_error ("Translation json is corrupted: '%s'", json);
         return NULL;
+    } catch (JSON::CorruptedLineException &e) {
+        log_error ("Translation json is corrupted: '%s'", json);
+        return NULL;
     } catch (...) {
         log_error ("Undefined error in translation, possibly invalid json '%s'", json);
         return NULL;
@@ -426,6 +363,9 @@ char *translation_get_translated_text_language (const TRANSLATION_CONFIGURATION 
         log_error ("Translation not found for '%s'", json);
         return NULL;
     } catch (Translation::CorruptedLineException &e) {
+        log_error ("Translation json is corrupted: '%s'", json);
+        return NULL;
+    } catch (JSON::CorruptedLineException &e) {
         log_error ("Translation json is corrupted: '%s'", json);
         return NULL;
     } catch (Translation::LanguageNotLoadedException &e) {
