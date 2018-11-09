@@ -8,7 +8,6 @@
 *.tmp
 
 save.xml
-
 # Object files
 *.o
 *.so

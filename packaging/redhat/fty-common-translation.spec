@@ -52,10 +52,10 @@ BuildRequires:  fty-common-logging-devel
 BuildRequires:  libsodium-devel
 BuildRequires:  zeromq-devel
 BuildRequires:  czmq-devel
-BuildRequires:  malamute-devel
 BuildRequires:  cxxtools-devel
-BuildRequires:  fty-common-devel
+BuildRequires:  malamute-devel
 BuildRequires:  openssl-devel
+BuildRequires:  fty-common-devel
 BuildRequires:  fty-common-mlm-devel
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
@@ -85,10 +85,10 @@ Requires:       fty-common-logging-devel
 Requires:       libsodium-devel
 Requires:       zeromq-devel
 Requires:       czmq-devel
-Requires:       malamute-devel
 Requires:       cxxtools-devel
-Requires:       fty-common-devel
+Requires:       malamute-devel
 Requires:       openssl-devel
+Requires:       fty-common-devel
 Requires:       fty-common-mlm-devel
 
 %description devel
