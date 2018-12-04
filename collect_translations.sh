@@ -11,7 +11,7 @@ echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
 echo "" >"${OUTPUT}.ttsl"
 # will match both TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
-for FILE in $(grep -rsIl --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
     # sed 's/\\$//g' - remove backslashes at the end of the lines used in #define that create false escape sequences
     # tr -d '\n' <"${files}" - collapse all newlines, so every TRANSLATE_ME will start on new line later
     # for the purpose of reading keys, TRANSLATE_ME is equal to TRANSLATE_ME_IGNORE_PARAMS
