@@ -21,6 +21,10 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     sed 's/\\$//' "${FILE}" | tr -d '\n' | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
+    # process warranty rule specially as translation strings there are not quoted
+    sed 's/\\$//' fty-alert-engine/src/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
+    # fix trailing newline as previous step removed all newlines
+    echo "" >>"${OUTPUT}.ttsl"
 done
 # remove empty lines and duplicates
 sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq >"${OUTPUT}.tsl"
