@@ -11,7 +11,7 @@ echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
 echo "" >"${OUTPUT}.ttsl"
 # will match both TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
-for FILE in $(grep -rsIl --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
     # sed 's/\\$//g' - remove backslashes at the end of the lines used in #define that create false escape sequences
     # tr -d '\n' <"${files}" - collapse all newlines, so every TRANSLATE_ME will start on new line later
     # for the purpose of reading keys, TRANSLATE_ME is equal to TRANSLATE_ME_IGNORE_PARAMS
@@ -19,6 +19,10 @@ for FILE in $(grep -rsIl --include="*.c" --include="*.cc" --include="*.cpp" --in
     # tail -n +2 - first line is just buzz, usually licence and includes, all the rest lines are content of TRANSLATE_ME
     # sed 's/\([^\]\)" *\(,\|)\).*$/\1/' - remove the rest of the line as we're interested only in first argument of TRANSLATE_ME
     sed 's/\\$//' "${FILE}" | tr -d '\n' | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
+    # fix trailing newline as previous step removed all newlines
+    echo "" >>"${OUTPUT}.ttsl"
+    # process warranty rule specially as translation strings there are not quoted
+    sed 's/\\$//' fty-alert-engine/src/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
 done
