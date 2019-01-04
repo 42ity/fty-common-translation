@@ -39,6 +39,7 @@
 #define VARIABLES "variables"
 #define VARIABLE "variable"
 #define KEY "key"
+#define VALUE "value"
 #define FILE_EXTENSION ".json"
 
 // trim from start (in place)
@@ -99,6 +100,11 @@ std::string Translation::getTranslatedText (const size_t order, const std::strin
         value = JSON::readString (json, begin, end);
     } else {
         throw CorruptedLineException ();
+    }
+
+    // handle special key 'value' inside ENAME
+    if (key.find (VALUE) != std::string::npos) {
+        return value;
     }
     // check for "key" keyword
     if (key.find (KEY) == std::string::npos && key.find (VARIABLE) == std::string::npos) {
@@ -528,6 +534,11 @@ fty_common_translation_base_test (bool verbose)
         const char *str17_exp = "string\nwith\nnewlines";
         res = translation_get_translated_text (str17_src);
         assert (strcmp (res, str17_exp) == 0);
+        free (res);
+        const char *str18_src = " {\"key\" : \"TRANSLATE_LUA(Phase imbalance in datacenter {{ename}} is high.)\", \"variables\" : {\"ename\" : { \"value\" : \"DC-Roztoky\", \"assetLink\" : \"datacenter-3\" } } }";
+        const char *str18_exp = "Phase imbalance in datacenter DC-Roztoky is high.";
+        res = translation_get_translated_text (str18_src);
+        assert (strcmp (res, str18_exp) == 0);
         free (res);
     } catch (...) {
         log_error ("An exception was caught");
