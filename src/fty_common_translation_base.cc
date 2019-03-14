@@ -224,7 +224,8 @@ void Translation::loadLanguage (const std::string &language) {
             begin = end + 1;
             value = JSON::readString (line, begin, end);
             replaceEscapedChars (value);
-            log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
+            //NOTE: keep this for debugging purposes, just comment it out
+            //log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
             language_translations_[key].push_back (value);
         }
         if (line != "}") {
