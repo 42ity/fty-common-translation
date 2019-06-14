@@ -3,7 +3,7 @@ BEGIN               { print "{"; }
                         LINE=$0;
                         EN_TEXT=LINE;
                         sub("TRANSLATE_LUA *\\(", "", EN_TEXT);
-                        sub(")$", "", EN_TEXT);
+                        sub("\\)$", "", EN_TEXT);
                         if (NR==TNR)
                             {print "\t\""LINE"\": \""EN_TEXT"\"";}
                         else
