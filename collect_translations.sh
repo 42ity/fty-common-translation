@@ -21,6 +21,8 @@
 #  \author  Jim Klimov <EvgenyKlimov@Eaton.com>
 #  \author  Jiri Kukacka <JiriKukacka@Eaton.com>
 
+set -o pipefail
+
 TARGET='./'
 OUTPUT='all'
 if [[ ! -z "$1" ]] ; then
