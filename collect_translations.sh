@@ -44,7 +44,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
     # process warranty rule specially as translation strings there are not quoted
-    sed 's/\\$//' fty-alert-engine/src/rule_templates/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
+    sed 's/\\$//' fty-alert-engine/src/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
 done
