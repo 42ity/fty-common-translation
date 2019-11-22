@@ -9,7 +9,6 @@ AM_CXXFLAGS = \
     -std=c++11
 
 AM_CPPFLAGS = \
-    ${log4cplus_CFLAGS} \
     ${fty_common_logging_CFLAGS} \
     ${libsodium_CFLAGS} \
     ${libzmq_CFLAGS} \
@@ -22,7 +21,7 @@ AM_CPPFLAGS = \
     -D__STDC_FORMAT_MACROS \
     -I$(srcdir)/include
 
-project_libs = ${log4cplus_LIBS} ${fty_common_logging_LIBS} ${libsodium_LIBS} ${libzmq_LIBS} ${czmq_LIBS} ${cxxtools_LIBS} ${malamute_LIBS} ${openssl_LIBS} ${fty_common_LIBS} ${fty_common_mlm_LIBS}
+project_libs = ${fty_common_logging_LIBS} ${libsodium_LIBS} ${libzmq_LIBS} ${czmq_LIBS} ${cxxtools_LIBS} ${malamute_LIBS} ${openssl_LIBS} ${fty_common_LIBS} ${fty_common_mlm_LIBS}
 
 SUBDIRS = doc
 SUBDIRS += include
@@ -43,7 +42,6 @@ DISTCLEANFILES =
 
 if ENABLE_DIST_CMAKEFILES
 EXTRA_DIST += \
-    Findlog4cplus.cmake \
     Findfty_common_logging.cmake \
     Findlibsodium.cmake \
     Findlibzmq.cmake \

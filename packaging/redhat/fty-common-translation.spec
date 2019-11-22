@@ -47,7 +47,6 @@ BuildRequires:  libtool
 BuildRequires:  pkgconfig
 BuildRequires:  xmlto
 BuildRequires:  gcc-c++
-BuildRequires:  log4cplus-devel
 BuildRequires:  fty-common-logging-devel
 BuildRequires:  libsodium-devel
 BuildRequires:  zeromq-devel
@@ -80,7 +79,6 @@ This package contains shared library for fty-common-translation: provides common
 Summary:        provides common translation library
 Group:          System/Libraries
 Requires:       libfty_common_translation1 = %{version}
-Requires:       log4cplus-devel
 Requires:       fty-common-logging-devel
 Requires:       libsodium-devel
 Requires:       zeromq-devel
