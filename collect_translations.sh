@@ -59,6 +59,13 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
 done
+# Check if projects include "src/locale_en_US.json" files, and store content for further processing
+rm -f BE_projects_locale_en_US.json
+for FILE in $(find "${TARGET}" -name locale_en_US.json | grep -v "weblate"); do
+    echo "Processing projects provided translations ($FILE)"
+    # Remove JSON struct lines
+    sed -e '/^{/d; /^\}/d' "${FILE}" >> BE_projects_locale_en_US.json
+done
 # remove empty lines and duplicates
 sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq >"${OUTPUT}.tsl"
 # gather whole content of TRANSLATE_LUA
