@@ -62,8 +62,13 @@ done
 # Check if projects include "src/locale_en_US.json" files, and store content for further processing
 rm -f BE_projects_locale_en_US.json
 for FILE in $(find "${TARGET}" -name locale_en_US.json | grep -v "weblate"); do
+    if [ ! -s "${FILE}" ]; then
+        echo "SKIP: Invalid project-provided translations ($FILE)"
+        continue
+    fi
     echo "Processing projects provided translations ($FILE)"
-    # Remove JSON struct lines
+    # Remove JSON struct lines around the contents; prefix with "," to follow existing JSON in final target file
+    echo "," >> BE_projects_locale_en_US.json
     sed -e '/^{/d; /^\}/d' "${FILE}" >> BE_projects_locale_en_US.json
 done
 # remove empty lines and duplicates
