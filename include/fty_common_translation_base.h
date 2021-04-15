@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <fty_common_json.h>
+#include <fty_common.h>
 
 typedef struct
 {

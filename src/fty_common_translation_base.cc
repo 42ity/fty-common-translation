@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <fty_log.h>
 
 #define VARIABLES      "variables"
 #define VARIABLE       "variable"
