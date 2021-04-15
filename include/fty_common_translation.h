@@ -19,12 +19,13 @@
     =========================================================================
 */
 
-#ifndef FTY_COMMON_TRANSLATION_H_H_INCLUDED
-#define FTY_COMMON_TRANSLATION_H_H_INCLUDED
+#pragma once
 
-//  Include the project library file
-#include "fty_common_translation_library.h"
+//  Opaque class structures to allow forward references
+//  These classes are stable or legacy and built in all releases
+typedef struct _fty_common_translation_base_t fty_common_translation_base_t;
+#define FTY_COMMON_TRANSLATION_BASE_T_DEFINED
 
-//  Add your own public definitions here, if you need them
 
-#endif
+//  Public classes, each with its own header file
+#include "fty_common_translation_base.h"
