@@ -55,14 +55,3 @@ Depends: ${misc:Depends}, ${shlibs:Depends},
 Description: runnable binaries from fty-common-translation
  Main package for fty-common-translation:
  provides common translation library
-
-Package: fty-common-translation-dbg
-Architecture: any
-Section: debug
-Priority: optional
-Depends:
-    fty-common-translation (= ${binary:Version}),
-    ${misc:Depends}
-Description: fty-common-translation debugging symbols
- This package contains the debugging symbols for fty-common-translation:
- provides common translation library.
