@@ -51,7 +51,7 @@ Description: fty-common-translation development tools
 
 Package: fty-common-translation
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends},
+Depends: ${misc:Depends}
 Description: runnable binaries from fty-common-translation
  Main package for fty-common-translation:
  provides common translation library

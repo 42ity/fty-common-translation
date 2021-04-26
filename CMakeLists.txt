@@ -47,6 +47,7 @@ etn_test_target(${PROJECT_NAME}
 install(PROGRAMS
         collect_translations.sh
         translations_to_weblate.sh
+        translations_to_weblate.awk
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 ########################################################################################################################
