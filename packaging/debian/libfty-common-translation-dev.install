@@ -1,2 +1,4 @@
 usr/include/*
 usr/lib/*/pkgconfig/libfty_common_translation.pc
+usr/share/cmake/*
+usr/lib/*/libfty_common_translation.so
