@@ -21,7 +21,11 @@
 
 #pragma once
 
-#include <fty_common.h>
+#ifdef __cplusplus
+#include <climits>
+#else
+#include <limits.h>
+#endif
 
 typedef struct
 {
@@ -42,6 +46,7 @@ typedef enum
 
 #ifdef __cplusplus
 
+#include <map>
 #include <string>
 #include <vector>
 

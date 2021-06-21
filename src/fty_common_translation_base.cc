@@ -20,6 +20,7 @@
 */
 
 #include "fty_common_translation_base.h"
+#include <fty_common.h>
 #include <algorithm>
 #include <cctype>
 #include <fstream>
