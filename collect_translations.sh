@@ -23,6 +23,7 @@
 
 set -o pipefail
 
+RETCODE=0
 TARGET='./'
 OUTPUT='all'
 if [[ ! -z "$1" ]] ; then
@@ -57,11 +58,23 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
     | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
-    >> "${OUTPUT}.ttsl"
+    > "${OUTPUT}.ttsl.tmp" \
+    || RETCODE=$?
 
+    if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
+        echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
+        echo "" >&2
+        if [ "${DEBUG_FAIL_FAST-}" = true ]; then
+            exit 1
+        else # fail in the end
+            RETCODE=1
+        fi
+    fi
+
+    cat "${OUTPUT}.ttsl.tmp"
     # fix trailing newline as previous step removed all newlines
-    echo "" >> "${OUTPUT}.ttsl"
-done
+    echo ""
+done >> "${OUTPUT}.ttsl" || RETCODE=$?
 
 # Special handling routed above
 if $GOT_FAE_WARRANTY_RULE ; then
@@ -71,21 +84,34 @@ if $GOT_FAE_WARRANTY_RULE ; then
         FILE="fty-alert-engine/src/warranty.rule"
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
-        >> "${OUTPUT}.ttsl"
+        > "${OUTPUT}.ttsl.tmp" \
+        || RETCODE=$?
     elif [ -s fty-alert-engine/src/rule_templates/warranty.rule ]; then
         # After alert-refactoring
         FILE="fty-alert-engine/src/rule_templates/warranty.rule"
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
-        >> "${OUTPUT}.ttsl"
+        > "${OUTPUT}.ttsl.tmp" \
+        || RETCODE=$?
     else
         echo "ERROR : fty-alert-engine/.../warranty.rule not found" >&2
         exit 22
     fi
 
+    if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
+        echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
+        echo "" >&2
+        if [ "${DEBUG_FAIL_FAST-}" = true ]; then
+            exit 1
+        else # fail in the end
+            RETCODE=1
+        fi
+    fi
+
     # fix trailing newline as previous step removed all newlines
-    echo "" >> "${OUTPUT}.ttsl"
-done
+    cat "${OUTPUT}.ttsl.tmp"
+    echo ""
+fi >> "${OUTPUT}.ttsl" || RETCODE=$?
 
 # Check if projects include "src/locale_en_US.json" files, and store content for further processing
 echo ""
@@ -98,12 +124,12 @@ for FILE in $(find "${TARGET}" -name locale_en_US.json | grep -v "weblate"); do
     fi
     echo "Processing projects provided translations ($FILE)" >&2
     # Remove JSON struct lines around the contents; prefix with "," to follow existing JSON in final target file
-    echo "," >> BE_projects_locale_en_US.json
-    sed -e '/^{/d; /^\}/d' "${FILE}" >> BE_projects_locale_en_US.json
-done
+    echo ","
+    sed -e '/^{/d; /^\}/d' "${FILE}"
+done > BE_projects_locale_en_US.json || RETCODE=$?
 
 # remove empty lines and duplicates
-sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq > "${OUTPUT}.tsl"
+sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq > "${OUTPUT}.tsl" || RETCODE=$?
 
 # gather whole content of TRANSLATE_LUA
 # search for all TRANSLATE_LUA strings, remove defines
@@ -113,32 +139,54 @@ sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq > "${OUTPUT}.tsl"
 # then also remove duplicates
 echo ""
 echo "===== PARSING TRANSLATE_LUA ====="
-grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} \
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" 'TRANSLATE_LUA *(' "${TARGET}"); do
+    # ORIG #  grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} | grep -v '#define TRANSLATE_LUA *(' | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' | grep "TRANSLATE_LUA" | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' | sort | uniq > "${OUTPUT}_lua.tsl"
+    grep -snI 'TRANSLATE_LUA *(' "$FILE" \
     | grep -v '#define TRANSLATE_LUA *(' \
     | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' \
     | grep "TRANSLATE_LUA" \
     | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' \
-    | sort | uniq > "${OUTPUT}_lua.tsl"
+    > "${OUTPUT}_lua.ttsl.tmp" \
+    || RETCODE=$?
+
+    if (grep "[^\\]\"" "${OUTPUT}_lua.ttsl.tmp" >&2) ; then
+        echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_LUA, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
+        echo "" >&2
+        if [ "${DEBUG_FAIL_FAST-}" = true ]; then
+            exit 1
+        else # fail in the end
+            RETCODE=1
+        fi
+    fi
+
+    cat "${OUTPUT}_lua.ttsl.tmp"
+done > "${OUTPUT}_lua.ttsl" || RETCODE=$?
+
+# remove duplicate lines
+cat "${OUTPUT}_lua.ttsl" | sort | uniq > "${OUTPUT}_lua.tsl" || RETCODE=$?
 
 echo ""
 if [ "${DEBUG_NOCLEANUP-}" = true ]; then
     echo "=== SKIPPED collect_translations.sh cleanup at `date -u` ==="
 else
     echo "=== CLEAN UP ==="
-    rm -f "${OUTPUT}.ttsl"
-    rm -f "${OUTPUT}_lua.ttsl"
+    rm -f "${OUTPUT}.ttsl" "${OUTPUT}.ttsl.tmp"
+    rm -f "${OUTPUT}_lua.ttsl" "${OUTPUT}_lua.ttsl.tmp"
 fi
 
 echo ""
 echo "=== INTEGRITY CHECK ==="
 if (grep "[^\\]\"" "${OUTPUT}.tsl" >&2) ; then
     echo "===== ERROR IN ${OUTPUT}.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK =====" >&2
-    exit 1
+    echo ""
+    RETCODE=1
 fi
 
 if (grep "[^\\]\"" "${OUTPUT}_lua.tsl" >&2) ; then
     echo "===== ERROR IN ${OUTPUT}_lua.tsl, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK =====" >&2
-    exit 1
+    echo ""
+    RETCODE=1
 fi
 
-echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+[ "$RETCODE" = 0 ] && echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+exit $RETCODE
