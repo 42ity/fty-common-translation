@@ -53,7 +53,11 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' - turn TRANSLATE_ME_IGNORE_PARAMS into TRANSLATE_ME, remove #define TRANSLATE_ME, remove empty string TRANSLATE_ME(""), add newlines instead of TRANSLATE_ME
     # tail -n +2 - first line is just buzz, usually licence and includes, all the rest lines are content of TRANSLATE_ME
     # sed 's/\([^\]\)" *\(,\|)\).*$/\1/' - remove the rest of the line as we're interested only in first argument of TRANSLATE_ME
-    sed 's/\\$//' "${FILE}" | tr -d '\n' | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' >> "${OUTPUT}.ttsl"
+
+    sed 's/\\$//' "${FILE}" | tr -d '\n' \
+    | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
+    | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
+    >> "${OUTPUT}.ttsl"
 
     # fix trailing newline as previous step removed all newlines
     echo "" >> "${OUTPUT}.ttsl"
