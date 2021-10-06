@@ -113,7 +113,12 @@ sed '/^\s*$/d' "${OUTPUT}.ttsl" | sort | uniq > "${OUTPUT}.tsl"
 # then also remove duplicates
 echo ""
 echo "===== PARSING TRANSLATE_LUA ====="
-grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} | grep -v '#define TRANSLATE_LUA *(' | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' | grep "TRANSLATE_LUA" | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' | sort | uniq > "${OUTPUT}_lua.tsl"
+grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} \
+    | grep -v '#define TRANSLATE_LUA *(' \
+    | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' \
+    | grep "TRANSLATE_LUA" \
+    | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' \
+    | sort | uniq > "${OUTPUT}_lua.tsl"
 
 echo ""
 if [ "${DEBUG_NOCLEANUP-}" = true ]; then
