@@ -141,6 +141,11 @@ echo ""
 echo "===== PARSING TRANSLATE_LUA ====="
 for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" 'TRANSLATE_LUA *(' "${TARGET}"); do
     # ORIG #  grep -rsnI --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" "TRANSLATE_LUA *(" ${TARGET} | grep -v '#define TRANSLATE_LUA *(' | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' | grep "TRANSLATE_LUA" | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' | sort | uniq > "${OUTPUT}_lua.tsl"
+    if [ -z "`grep -v '#define TRANSLATE_LUA *(' "$FILE" | grep -w 'TRANSLATE_LUA'`" ]; then
+        echo "SKIP: '$FILE' only defines TRANSLATE_LUA and does not use it" >&2
+        continue
+    fi
+
     grep -snI 'TRANSLATE_LUA *(' "$FILE" \
     | grep -v '#define TRANSLATE_LUA *(' \
     | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' \
