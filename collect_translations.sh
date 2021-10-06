@@ -35,7 +35,15 @@ echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
 echo "" >"${OUTPUT}.ttsl"
 # will match both TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
+GOT_FAE_WARRANTY_RULE=false
 for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
+    case "$FILE" in
+        fty-alert-engine/*/warranty.rule)
+            # Several version patterns to consider, handled separately
+            GOT_FAE_WARRANTY_RULE=true
+            continue ;;
+    esac
+
     # sed 's/\\$//g' - remove backslashes at the end of the lines used in #define that create false escape sequences
     # tr -d '\n' <"${files}" - collapse all newlines, so every TRANSLATE_ME will start on new line later
     # for the purpose of reading keys, TRANSLATE_ME is equal to TRANSLATE_ME_IGNORE_PARAMS
@@ -45,13 +53,23 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     sed 's/\\$//' "${FILE}" | tr -d '\n' | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl"
     # fix trailing newline as previous step removed all newlines
     echo "" >>"${OUTPUT}.ttsl"
+done
+
+# Special handling routed above
+if $GOT_FAE_WARRANTY_RULE ; then
     # process warranty rule specially as translation strings there are not quoted
     if [ -s fty-alert-engine/src/warranty.rule ] ; then
         # Legacy layout
-        sed 's/\\$//' fty-alert-engine/src/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl" || exit
+        FILE="fty-alert-engine/src/warranty.rule"
+        sed 's/\\$//' "$FILE" | tr -d '\n' \
+        | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
+        >> "${OUTPUT}.ttsl"
     elif [ -s fty-alert-engine/src/rule_templates/warranty.rule ]; then
         # After alert-refactoring
-        sed 's/\\$//' fty-alert-engine/src/rule_templates/warranty.rule | tr -d '\n' | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' >>"${OUTPUT}.ttsl" || exit
+        FILE="fty-alert-engine/src/rule_templates/warranty.rule"
+        sed 's/\\$//' "$FILE" | tr -d '\n' \
+        | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
+        >> "${OUTPUT}.ttsl"
     else
         echo "ERROR : fty-alert-engine/.../warranty.rule not found" >&2
         exit 22
