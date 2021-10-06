@@ -188,5 +188,10 @@ if (grep "[^\\]\"" "${OUTPUT}_lua.tsl" >&2) ; then
     RETCODE=1
 fi
 
-[ "$RETCODE" = 0 ] && echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+if [ "$RETCODE" = 0 ]; then
+    echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+else
+    echo "=== DONE WITH ERRORS ($RETCODE), SEE DETAILS ABOVE ===" >&2
+fi
+
 exit $RETCODE
