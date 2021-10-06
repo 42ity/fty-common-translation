@@ -59,7 +59,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
     > "${OUTPUT}.ttsl.tmp" \
-    || RETCODE=$?
+    || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
 
     if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
         echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
@@ -92,7 +92,7 @@ if $GOT_FAE_WARRANTY_RULE ; then
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
         > "${OUTPUT}.ttsl.tmp" \
-        || RETCODE=$?
+        || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
     else
         echo "ERROR : fty-alert-engine/.../warranty.rule not found" >&2
         exit 22
@@ -147,7 +147,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     | grep "TRANSLATE_LUA" \
     | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' \
     > "${OUTPUT}_lua.ttsl.tmp" \
-    || RETCODE=$?
+    || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_LUA =====" >&2; }
 
     if (grep "[^\\]\"" "${OUTPUT}_lua.ttsl.tmp" >&2) ; then
         echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_LUA, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
@@ -188,5 +188,10 @@ if (grep "[^\\]\"" "${OUTPUT}_lua.tsl" >&2) ; then
     RETCODE=1
 fi
 
-[ "$RETCODE" = 0 ] && echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+if [ "$RETCODE" = 0 ]; then
+    echo "=== DONE, OUTPUT PUT TO ${OUTPUT}.tsl AND ${OUTPUT}_lua.tsl ===" >&2
+else
+    echo "=== DONE WITH ERRORS ($RETCODE), SEE DETAILS ABOVE ===" >&2
+fi
+
 exit $RETCODE
