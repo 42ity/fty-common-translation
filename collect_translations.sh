@@ -61,6 +61,12 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     > "${OUTPUT}.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
 
+    sed 's/\\$//' "${FILE}" | tr -d '\n' \
+    | grep -E '\"_tr[^a-zA-Z0-9_]' | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
+    | grep -E '_tr$' | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
+    >> "${OUTPUT}.ttsl.tmp" \
+    || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
+
     if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
         echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
         echo "" >&2
