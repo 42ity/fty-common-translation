@@ -75,8 +75,10 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     if grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' "${FILE}" >/dev/null ; then
         # EOL original text after each "_tr, then un-quote found string lines:
         sed 's/\\$//' "${FILE}" | tr -d '\n' \
-        | { grep -E '\"_tr[^a-zA-Z0-9_]' || true ; } | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
-        | { grep -E '_tr$' || true; } | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
+        | { grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' || true ; } \
+        | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
+        | { grep -E '_tr$' || true; } \
+        | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
         >> "${OUTPUT}.ttsl.tmp" \
         || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
     fi
