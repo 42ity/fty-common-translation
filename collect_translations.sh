@@ -31,6 +31,8 @@ if [[ ! -z "$1" ]] ; then
     OUTPUT="$1"
 fi
 
+unset GREP_OPTIONS || true
+
 # .tsl = translation string list
 echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
@@ -38,9 +40,9 @@ echo "" > "${OUTPUT}.ttsl"
 # will match both TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
 
 echo ""
-echo "===== PARSING TRANSLATE_ME ====="
+echo "===== PARSING TRANSLATE_ME() family, fty::tr() and \"string\"_tr patterns ====="
 GOT_FAE_WARRANTY_RULE=false
-for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" -E '(TRANSLATE_ME|fty *:: *tr|\"_tr)' "${TARGET}"); do
     case "$FILE" in
         fty-alert-engine/*/warranty.rule)
             # Several version patterns to consider, handled separately
@@ -55,11 +57,31 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # tail -n +2 - first line is just buzz, usually licence and includes, all the rest lines are content of TRANSLATE_ME
     # sed 's/\([^\]\)" *\(,\|)\).*$/\1/' - remove the rest of the line as we're interested only in first argument of TRANSLATE_ME
 
+    # Handle localizations like:
+    #   fty::tr("parrot: {} {}").format("norwegian", "blue");
+    #   fty::tr("this is an ex-parrot");
+    #   TRANSLATE_ME("JSON beautification failed");
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
-    | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
+    | sed 's/\(TRANSLATE_ME_IGNORE_PARAMS\|fty *:: *tr\) *(/TRANSLATE_ME(/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
     > "${OUTPUT}.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
+
+    # Handle localizations like:
+    #   src/import.cpp: auditError("Request CREATE asset_import FAILED {}"_tr, part.error());
+    #   src/list-in.cpp: throw rest::errors::RequestParamBad("type", *type, "valid type like datacenter, room, etc..."_tr);
+    # FIXME: This currently would not parse escaped double-quote correctly,
+    # but at the moment we do not have sources with that.
+    if grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' "${FILE}" >/dev/null ; then
+        # EOL original text after each "_tr, then un-quote found string lines:
+        sed 's/\\$//' "${FILE}" | tr -d '\n' \
+        | { grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' || true ; } \
+        | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
+        | { grep -E '_tr$' || true; } \
+        | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
+        >> "${OUTPUT}.ttsl.tmp" \
+        || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
+    fi
 
     if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
         echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
