@@ -70,11 +70,13 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     #   src/list-in.cpp: throw rest::errors::RequestParamBad("type", *type, "valid type like datacenter, room, etc..."_tr);
     # FIXME: This currently would not parse escaped double-quote correctly,
     # but at the moment we do not have sources with that.
-    sed 's/\\$//' "${FILE}" | tr -d '\n' \
-    | grep -E '\"_tr[^a-zA-Z0-9_]' | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
-    | grep -E '_tr$' | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
-    >> "${OUTPUT}.ttsl.tmp" \
-    || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
+    if grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' "${FILE}" ; then
+        sed 's/\\$//' "${FILE}" | tr -d '\n' \
+        | { grep -E '\"_tr[^a-zA-Z0-9_]' || true ; } | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
+        | { grep -E '_tr$' || true; } | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
+        >> "${OUTPUT}.ttsl.tmp" \
+        || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
+    fi
 
     if (grep "[^\\]\"" "${OUTPUT}.ttsl.tmp" >&2) ; then
         echo "^^^^^ ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME, UNESCAPED QUOTE \" CHARACTER FOUND, YOU NEED TO PERFORM MANUAL CHECK !!!" >&2
