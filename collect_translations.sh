@@ -40,7 +40,7 @@ echo "" > "${OUTPUT}.ttsl"
 echo ""
 echo "===== PARSING TRANSLATE_ME() family, fty::tr() and \"string\"_tr patterns ====="
 GOT_FAE_WARRANTY_RULE=false
-for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" -E '(TRANSLATE_ME|fty *:: *tr|\"_tr)' "${TARGET}"); do
     case "$FILE" in
         fty-alert-engine/*/warranty.rule)
             # Several version patterns to consider, handled separately
