@@ -55,12 +55,19 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # tail -n +2 - first line is just buzz, usually licence and includes, all the rest lines are content of TRANSLATE_ME
     # sed 's/\([^\]\)" *\(,\|)\).*$/\1/' - remove the rest of the line as we're interested only in first argument of TRANSLATE_ME
 
+    # Handle localizations like:
+    #   fty::tr("parrot: {} {}").format("norwegian", "blue");
+    #   fty::tr("this is an ex-parrot");
+    #   TRANSLATE_ME("JSON beautification failed");
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
     | sed 's/\(TRANSLATE_ME_IGNORE_PARAMS\|fty *:: *tr\) *(/TRANSLATE_ME(/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
     > "${OUTPUT}.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
 
+    # Handle localizations like:
+    #   src/import.cpp: auditError("Request CREATE asset_import FAILED {}"_tr, part.error());
+    #   src/list-in.cpp: throw rest::errors::RequestParamBad("type", *type, "valid type like datacenter, room, etc..."_tr);
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
     | grep -E '\"_tr[^a-zA-Z0-9_]' | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
     | grep -E '_tr$' | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
