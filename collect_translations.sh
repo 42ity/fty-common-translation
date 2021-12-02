@@ -72,7 +72,8 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     #   src/list-in.cpp: throw rest::errors::RequestParamBad("type", *type, "valid type like datacenter, room, etc..."_tr);
     # FIXME: This currently would not parse escaped double-quote correctly,
     # but at the moment we do not have sources with that.
-    if grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' "${FILE}" ; then
+    if grep -E '(\"_tr[^a-zA-Z0-9_]|\"_tr$)' "${FILE}" >/dev/null ; then
+        # EOL original text after each "_tr, then un-quote found string lines:
         sed 's/\\$//' "${FILE}" | tr -d '\n' \
         | { grep -E '\"_tr[^a-zA-Z0-9_]' || true ; } | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
         | { grep -E '_tr$' || true; } | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
