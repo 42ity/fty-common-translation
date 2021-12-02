@@ -56,7 +56,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     # sed 's/\([^\]\)" *\(,\|)\).*$/\1/' - remove the rest of the line as we're interested only in first argument of TRANSLATE_ME
 
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
-    | sed 's/TRANSLATE_ME_IGNORE_PARAMS/TRANSLATE_ME/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
+    | sed 's/\(TRANSLATE_ME_IGNORE_PARAMS\|fty *:: *tr\) *(/TRANSLATE_ME(/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
     > "${OUTPUT}.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
