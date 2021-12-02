@@ -31,6 +31,8 @@ if [[ ! -z "$1" ]] ; then
     OUTPUT="$1"
 fi
 
+unset GREP_OPTIONS || true
+
 # .tsl = translation string list
 echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
