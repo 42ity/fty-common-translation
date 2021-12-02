@@ -38,7 +38,7 @@ echo "" > "${OUTPUT}.ttsl"
 # will match both TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
 
 echo ""
-echo "===== PARSING TRANSLATE_ME ====="
+echo "===== PARSING TRANSLATE_ME() family, fty::tr() and \"string\"_tr patterns ====="
 GOT_FAE_WARRANTY_RULE=false
 for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" TRANSLATE_ME "${TARGET}"); do
     case "$FILE" in
