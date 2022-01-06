@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018 - 2020 Eaton
+# Copyright (C) 2018 - 2022 Eaton
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,6 +33,18 @@ fi
 
 unset GREP_OPTIONS || true
 
+count_positional_vars() {
+    # Helper filter (stdin=>stdout) to convert new-style format strings
+    # with "{}" braces as place-holders for variable argument expansion
+    # into "{{varN}}" tokens that our codebase expects to inject further
+    # text, data, JSONs, etc. Reminder: full structure is like this:
+    #   {"key":"parrot: {{var1}} {{var2}}","variables":{"var1":"blue","var2":"norwegian"}}
+    # so here we should convert
+    #   "parrot: {} {}" => "parrot: {{var1}} {{var2}}"
+    # (applies to both key and value in en_US JSONs)
+    cat
+}
+
 # .tsl = translation string list
 echo "=== COLLECTING TRANSLATIONS ==="
 # gather first argument of TRANSLATE_ME and TRANSLATE_ME_IGNORE_PARAMS
@@ -64,6 +76,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     sed 's/\\$//' "${FILE}" | tr -d '\n' \
     | sed 's/\(TRANSLATE_ME_IGNORE_PARAMS\|fty *:: *tr\) *(/TRANSLATE_ME(/g;s/#define *TRANSLATE_ME//;s/TRANSLATE_ME *( *"" *)//g;s/TRANSLATE_ME *( *"/\n/g' \
     | tail -n +2 | sed 's/\([^\]\)" *\(,\|)\).*$/\1/' \
+    | count_positional_vars \
     > "${OUTPUT}.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
 
@@ -79,6 +92,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
         | sed -e 's,\("_tr\)\([^a-zA-Z0-9_]\),\1\n\2,g' \
         | { grep -E '_tr$' || true; } \
         | sed -e 's,^.*"\([^"]*\)"_tr$,\1,g' \
+        | count_positional_vars \
         >> "${OUTPUT}.ttsl.tmp" \
         || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR \"string\"_tr NOTATION =====" >&2; }
     fi
@@ -106,6 +120,7 @@ if $GOT_FAE_WARRANTY_RULE ; then
         FILE="fty-alert-engine/src/warranty.rule"
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
+        | count_positional_vars \
         > "${OUTPUT}.ttsl.tmp" \
         || RETCODE=$?
     elif [ -s fty-alert-engine/src/rule_templates/warranty.rule ]; then
@@ -113,6 +128,7 @@ if $GOT_FAE_WARRANTY_RULE ; then
         FILE="fty-alert-engine/src/rule_templates/warranty.rule"
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
+        | count_positional_vars \
         > "${OUTPUT}.ttsl.tmp" \
         || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
     else
@@ -173,6 +189,7 @@ for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --i
     | sed 's/\(TRANSLATE_LUA *(\)/\n\1/g' \
     | grep "TRANSLATE_LUA" \
     | sed 's/\([^\])\)\(\\\|\)\(\"\|\x27\).*$/\1/' \
+    | count_positional_vars \
     > "${OUTPUT}_lua.ttsl.tmp" \
     || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_LUA =====" >&2; }
 
