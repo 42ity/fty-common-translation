@@ -42,7 +42,17 @@ count_positional_vars() {
     # so here we should convert
     #   "parrot: {} {}" => "parrot: {{var1}} {{var2}}"
     # (applies to both key and value in en_US JSONs)
-    cat
+    # NOTE: This does not currently support counting mixed syntax
+    # (like "parrot {{var1}} is {}" - end of line substitute would be
+    # "parrot {{var1}} is {{var1}}" since that is the first "{}" hit)
+
+    # First awk converts "{}" hits to numbered vars, 1..N
+    # Second awk converts already numbered brace args to same-number vars:
+    # 'parrot: {3} {0} is {1}' => 'parrot: {{var3}} {{var0}} is {{var1}}'
+    # -- note it does not re-number nor check sanity ("{2}" missing above).
+
+    awk '{ i = 0; old = ""; new = $0; while (old != new) { old = new; new = gensub( "{}" , "{{var"++i"}}", 1, old ); } ; print new }' \
+    | awk '{ print gensub( "{([0-9]+)}", "{{var\\1}}", "g", $0) }'
 }
 
 # .tsl = translation string list
