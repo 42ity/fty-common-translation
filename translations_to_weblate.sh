@@ -49,7 +49,7 @@ awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
 # Deduplicate again, since the original C/C++ codebase can contain a
 # mix of old-style and new-style formatting strings over the course
 # of refactoring, modernization and clean-up.
-cat "${OUTPUT}" | sort | uniq > "${OUTPUT}" || RES=$?
+cat "${OUTPUT}.tmp" | sort | uniq > "${OUTPUT}" || RES=$?
 
 rm -f weblate_translations.tmp "${OUTPUT}.tmp"
 
