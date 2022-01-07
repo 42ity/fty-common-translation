@@ -49,7 +49,9 @@ awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
 # Deduplicate again, since the original C/C++ codebase can contain a
 # mix of old-style and new-style formatting strings over the course
 # of refactoring, modernization and clean-up.
-cat "${OUTPUT}.tmp" | sort | uniq > "${OUTPUT}" || RES=$?
+
+# Remove JSON starting and ending braces
+( echo "{"; cat "${OUTPUT}.tmp" | sed -e '/^\{/d' -e '/^\}/d'| sort | uniq; echo "}"; ) > "${OUTPUT}" || RES=$?
 
 rm -f weblate_translations.tmp "${OUTPUT}.tmp"
 
