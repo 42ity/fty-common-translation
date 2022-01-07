@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018 - 2020 Eaton
+# Copyright (C) 2018 - 2022 Eaton
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 #  \author  Jim Klimov <EvgenyKlimov@Eaton.com>
 #  \author  Jiri Kukacka <JiriKukacka@Eaton.com>
 
+# Note: bashism
+set -o pipefail
 
 # Ensure results are reproducible
 LANG=C
