@@ -53,7 +53,7 @@ awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
 # of refactoring, modernization and clean-up.
 
 # Remove JSON starting and ending braces
-( echo "{"; cat "${OUTPUT}.tmp" | sed -e '/^\{/d' -e '/^\}/d'| sort | uniq; echo "}"; ) > "${OUTPUT}" || RES=$?
+( echo "{"; cat "${OUTPUT}.tmp" | sed -e '/^{/d' -e '/^\}/d' | sort | uniq; echo "}"; ) > "${OUTPUT}" || RES=$?
 
 rm -f weblate_translations.tmp "${OUTPUT}.tmp"
 
