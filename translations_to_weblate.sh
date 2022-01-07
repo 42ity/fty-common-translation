@@ -53,9 +53,15 @@ awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
 # of refactoring, modernization and clean-up.
 
 # Remove JSON starting and ending braces
-( echo "{"; cat "${OUTPUT}.tmp" | sed -e '/^{/d' -e '/^\}/d' | sort | uniq; echo "}"; ) > "${OUTPUT}" || RES=$?
+cat "${OUTPUT}.tmp" | sed -e '/^{/d' -e '/^\}/d' | sort | uniq > "${OUTPUT}.tmp2"
+( echo "{"
+  awk -v TNR="$(wc -l "${OUTPUT}.tmp2" | cut -d' ' -f1)" \
+    '{ if (/[^,]$/) { if (NR!=TNR) {$0 = $0",";} } else { if (NR==TNR) { $0 = gensub(",$", "", "g", $0) } } print $0 }' \
+    < "${OUTPUT}.tmp2" || exit
+  echo "}"
+) > "${OUTPUT}" || RES=$?
 
-rm -f weblate_translations.tmp "${OUTPUT}.tmp"
+rm -f weblate_translations.tmp "${OUTPUT}.tmp" "${OUTPUT}.tmp2"
 
 echo "=== DONE, OUTPUT PUT TO ${OUTPUT}, exit-code is $RES ==="
 exit $RES
