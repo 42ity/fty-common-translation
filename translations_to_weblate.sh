@@ -44,8 +44,14 @@ RES=0
 cat ${TARGET} | sort | uniq > weblate_translations.tmp && \
 awk -v TNR="$(wc -l "weblate_translations.tmp" | cut -d' ' -f1)" \
     -f "${MY_PATH}/translations_to_weblate.awk" \
-    weblate_translations.tmp >"${OUTPUT}" || RES=$?
-rm -f weblate_translations.tmp
+    weblate_translations.tmp > "${OUTPUT}.tmp" || RES=$?
+
+# Deduplicate again, since the original C/C++ codebase can contain a
+# mix of old-style and new-style formatting strings over the course
+# of refactoring, modernization and clean-up.
+cat "${OUTPUT}" | sort | uniq > "${OUTPUT}" || RES=$?
+
+rm -f weblate_translations.tmp "${OUTPUT}.tmp"
 
 echo "=== DONE, OUTPUT PUT TO ${OUTPUT}, exit-code is $RES ==="
 exit $RES
