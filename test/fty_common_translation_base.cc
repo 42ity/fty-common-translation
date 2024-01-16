@@ -21,6 +21,7 @@
 
 #include "fty_common_translation_base.h"
 #include <catch2/catch.hpp>
+#include <optional>
 
 using namespace std::literals;
 
