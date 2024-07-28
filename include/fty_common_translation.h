@@ -81,17 +81,21 @@ private:
 
     // load language to structures, throws errors in case of failure
     void loadLanguage(const std::string& language);
-    // get translated text inner function
-    std::string getTranslatedText(const size_t order, const std::string& json);
+
+    // get translated text inner function (potentially recursive)
+    std::string getTranslatedText(const size_t order, const std::string& json, size_t depth = 0);
 
 public:
     // singleton, deleted functions should be public for better error handling
     Translation(const Translation&) = delete;
     Translation& operator=(const Translation&) = delete;
+
     // prepare configuration
     void configure(const std::string& agent_name, const std::string& path, const std::string& file_prefix);
+
     // change default used language
     void changeLanguage(const std::string& language);
+
     // get translated text from selected language
     std::string getTranslatedText(const std::string& json);
     std::string getTranslatedText(const TRANSLATION_CONFIGURATION& conf, const std::string& json);

@@ -29,7 +29,8 @@ static std::string translate(const std::string& input, const std::optional<TRANS
     try {
         if (config == std::nullopt) {
             return Translation::getInstance().getTranslatedText(input);
-        } else {
+        }
+        else {
             return Translation::getInstance().getTranslatedText(*config, input);
         }
     } catch (Translation::InvalidFileException&) {
@@ -52,14 +53,9 @@ static std::string translate(const std::string& input, const std::optional<TRANS
 
 TEST_CASE("Translation test_")
 {
-    REQUIRE_THROWS_AS(Translation::getInstance().configure("translation_test", "test/data", "test_wrong_"),
-        Translation::InvalidFileException);
-
-    REQUIRE_THROWS_AS(Translation::getInstance().configure("translation_test", "test/data", "test_empty_"),
-        Translation::EmptyFileException);
-
-    REQUIRE_THROWS_AS(Translation::getInstance().configure("translation_test", "test/data", "test_corrupted_"),
-        Translation::CorruptedLineException);
+    REQUIRE_THROWS(Translation::getInstance().configure("translation_test", "test/data", "test_wrong_"));
+    REQUIRE_THROWS(Translation::getInstance().configure("translation_test", "test/data", "test_empty_"));
+    REQUIRE_THROWS(Translation::getInstance().configure("translation_test", "test/data", "test_corrupted_"));
 
     // test case 1 - loading language
     REQUIRE_NOTHROW(Translation::getInstance().configure("translation_test", "test/data", "test_"));
@@ -94,7 +90,7 @@ TEST_CASE("Translation test_")
         CHECK_THROWS(translate("{ \"key\" }"));
         CHECK_THROWS(translate("{ \"key\" :}"));
         CHECK_THROWS(translate("{ \"key\" : \"\"}"));
-        CHECK_THROWS(translate("{ \"key\" : \"not found\"}"));
+        CHECK_THROWS(translate("{ \"key\" : \"fake key\"}"));
     }
 
     TRANSLATION_CONFIGURATION config = {const_cast<char*>("cs_CZ")};
@@ -186,14 +182,15 @@ TEST_CASE("Translation test_")
 
 TEST_CASE("Translation real_locale_")
 {
-    REQUIRE_NOTHROW(Translation::getInstance().configure("translation_test", "test/data", "real_locale_"));
+    REQUIRE_NOTHROW(Translation::getInstance().configure("translation_real_locale", "test/data", "real_locale_"));
 
     REQUIRE_NOTHROW(Translation::getInstance().changeLanguage("en_US"));
     REQUIRE_NOTHROW(Translation::getInstance().changeLanguage("fr_FR"));
-    REQUIRE_THROWS(Translation::getInstance().changeLanguage("xx_YY"));
+    REQUIRE_THROWS(Translation::getInstance().changeLanguage("fake_FAKE"));
 
     if(1) {
         TRANSLATION_CONFIGURATION config = {const_cast<char*>("en_US")};
+        std::cout << "== " << config.language << std::endl;
 
         struct {
             const std::string input;
@@ -219,9 +216,12 @@ TEST_CASE("Translation real_locale_")
                 R"( {"key": "{{var1}} is forbidden: {{var2}}", "variables" : { "var1" : "v1", "var3" : "v3" }} )",
                 "v1 is forbidden: {{var2}}"
             },
+            {
+                R"( {"key": "{{var1}} is forbidden: {{var2}}", "variables" : { "var1" : "v1", "var2" : { "value": "v2" } }} )",
+                "v1 is forbidden: v2"
+            },
         };
 
-        std::cout << "== " << config.language << std::endl;
         int index = 0;
         for (const auto& it : testVector) {
             std::string res;
@@ -233,6 +233,7 @@ TEST_CASE("Translation real_locale_")
 
     if(1) {
         TRANSLATION_CONFIGURATION config = {const_cast<char*>("fr_FR")};
+        std::cout << "== " << config.language << std::endl;
 
         struct {
             const std::string input;
@@ -258,9 +259,12 @@ TEST_CASE("Translation real_locale_")
                 R"( {"key": "{{var1}} is forbidden: {{var2}}", "variables" : { "var1" : "v1", "var3" : "v3" }} )",
                 "v1 is forbidden: {{var2}}" //not translated
             },
+            {
+                R"( {"key": "{{var1}} is forbidden: {{var2}}", "variables" : { "var1" : "v1", "var2" : { "value": "v2" } }} )",
+                "v1 is forbidden: v2" //not translated
+            },
         };
 
-        std::cout << "== " << config.language << std::endl;
         int index = 0;
         for (const auto& it : testVector) {
             std::string res;

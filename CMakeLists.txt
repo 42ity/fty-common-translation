@@ -19,6 +19,7 @@ etn_target(shared ${PROJECT_NAME}
     SOURCES
         src/fty_common_translation.cc
     USES
+        cxxtools
         fty_common
         fty_common_logging
 )
