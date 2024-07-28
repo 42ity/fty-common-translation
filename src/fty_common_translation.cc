@@ -1,5 +1,5 @@
 /*  =========================================================================
-    fty_common_translation_base - Singleton translation object
+    fty_common_translation - Singleton translation object
 
     Copyright (C) 2014 - 2020 Eaton
 
@@ -19,8 +19,10 @@
     =========================================================================
 */
 
-#include "fty_common_translation_base.h"
+#include "fty_common_translation.h"
 #include <fty_common.h>
+#include <fty_log.h>
+
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -28,7 +30,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <fty_log.h>
 
 #define VARIABLES      "variables"
 #define VARIABLE       "variable"
@@ -46,6 +47,7 @@ std::string Translation::getTranslatedText(const TRANSLATION_CONFIGURATION& conf
 {
     auto order_it = language_list_ordering_.find(conf.language);
     if (order_it == language_list_ordering_.end()) {
+        log_debug("LanguageNotLoadedException");
         throw LanguageNotLoadedException();
     }
     return getTranslatedText(order_it->second, json);
@@ -54,8 +56,9 @@ std::string Translation::getTranslatedText(const TRANSLATION_CONFIGURATION& conf
 
 std::string Translation::getTranslatedText(const size_t order, const std::string& json)
 {
-    // TODO add handling of special variables that might be just formated, such as { "variable" : "IPC 2000", "link":
-    // "http://42ity.org/" }
+    // TODO add handling of special variables that might be just formated,
+    // such as: { "variable" : "IPC 2000", "link": "http://42ity.org/" }
+
     std::string key, value, retval;
     size_t      begin = 0, end = 0;
     // read basic "key" : "translation_key" pair and validate
@@ -162,22 +165,28 @@ std::string Translation::getTranslatedText(const size_t order, const std::string
 
 static void replaceEscapedChars(std::string& target)
 {
-    size_t      n     = 0;
-    std::string key   = "\\n";
-    std::string value = "\n";
+    const std::string key{"\\n"};
+    const std::string value{"\n"};
+
+    size_t n = 0;
     while ((n = target.find(key, n)) != std::string::npos) {
         target.replace(n, key.size(), value);
         n += value.size();
     }
 }
 
+//#define _LOAD_DBG_
+//#define _LOAD_DBG_ALL_
 
+// read all key/value from a localization file
+// set language_translations_ map
 void Translation::loadLanguage(const std::string& language)
 {
     std::string filename = path_ + file_prefix_ + language + FILE_EXTENSION;
     log_debug("Loading translation file '%s'", filename.c_str());
+
     std::ifstream language_file(filename.c_str(), std::ios::in | std::ios::binary);
-    if (language_file) {
+    if (language_file.good()) {
         std::string line;
         while (std::getline(language_file, line) && line == "") {
             // skip empty lines
@@ -194,21 +203,51 @@ void Translation::loadLanguage(const std::string& language)
                 // skip empty lines
                 continue;
             }
-            std::string key, value;
-            size_t      begin = 0, end = 0;
-            // find key
-            key = JSON::readString(line, begin, end);
-            replaceEscapedChars(key);
-            begin = end + 1;
-            value = JSON::readString(line, begin, end);
-            replaceEscapedChars(value);
+#ifdef _LOAD_DBG_
             // NOTE: keep this for debugging purposes, just comment it out
-            // log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
+            log_debug ("line => '%s'", line.c_str ());
+#endif
+            std::string key, value;
+            try {
+                size_t begin = 0, end = 0;
+
+                // find key
+                key = JSON::readString(line, begin, end);
+                replaceEscapedChars(key);
+#ifdef _LOAD_DBG_
+                log_debug ("key => '%s'", key.c_str ());
+#endif
+
+                // find value
+                try {
+                    begin = end + 1;
+                    value = JSON::readString(line, begin, end);
+                    replaceEscapedChars(value);
+                }
+                catch (...) {
+                    // WA locale_fr_FR.json, line='    "Abort by a user request": "",'
+                    log_debug ("Exception reached (line: '%s')", line.c_str());
+                    //throw;
+                    value = key;
+                }
+#ifdef _LOAD_DBG_
+                log_debug ("value => '%s'", value.c_str());
+#endif
+            }
+            catch (const std::exception& e) {
+                log_debug ("Parse key/value exception: '%s'", e.what());
+                throw CorruptedLineException();
+            }
+
+#ifdef _LOAD_DBG_
+            log_debug ("loaded [%s] => '%s'", key.c_str (), value.c_str ());
+#endif
             language_translations_[key].push_back(value);
         }
         if (line != "}") {
             throw CorruptedLineException();
         }
+
         // check if there are missing translations for loaded language
         for (auto& item : language_translations_) {
             if (language_list_ordering_.size() != item.second.size()) {
@@ -216,44 +255,37 @@ void Translation::loadLanguage(const std::string& language)
             }
         }
     } else {
+        log_error ("loadLanguage: %s: %s", filename.c_str(), strerror(errno));
         throw InvalidFileException();
     }
-    /* if you'd ever try to debug this and wonder about content of loaded translations, this might come handy
-    std::cout << "Content of translations: ";
+
+#ifdef _LOAD_DBG_ALL_
+    // if you'd ever try to debug this and wonder about content of loaded translations, this might come handy
+    std::cout << "=== Content of translations: " << std::endl;
     for (auto x : language_translations_) {
-    std::cout << "[" << x.first << "]=>{";
-    for (auto y : x.second) {
-    std::cout << y << ", ";
-    }
-    std::cout << "}, ";
+        std::cout << "[" << x.first << "] => {";
+        for (auto y : x.second) {
+            std::cout << y << ", ";
+        }
+        std::cout << "}, " << std::endl;
     }
     std::cout << std::endl;
-    */
-}
-
-
-Translation::Translation()
-    : language_order_(size_t(-1))
-    , agent_name_("")
-{
-}
-
-
-Translation::~Translation()
-{
+#endif
 }
 
 
 void Translation::configure(const std::string& agent_name, const std::string& path, const std::string& file_prefix)
 {
-    agent_name_ = agent_name;
-    path_       = path;
-    if (path_[path_.length() - 1] != '/') {
+    agent_name_  = agent_name;
+    path_        = path;
+    file_prefix_ = file_prefix;
+    language_order_ = 0;
+
+    if ((path_.length() > 0) && (path_[path_.length() - 1] != '/')) {
         path_ += '/';
     }
-    file_prefix_ = file_prefix;
+
     loadLanguage(default_language_);
-    language_order_ = 0;
 }
 
 
@@ -312,64 +344,47 @@ int translation_change_language(const char* language)
 
 char* translation_get_translated_text(const char* json)
 {
-    if (nullptr == json) {
+    if (!json) {
         return nullptr;
     }
 
     try {
-        std::string tmp    = Translation::getInstance().getTranslatedText(json);
-        char*       retval = static_cast<char*>(malloc(sizeof(char) * tmp.length() + 1));
-        if (nullptr == retval) {
-            log_error("Unable to allocate memory for translation C interface");
-            return nullptr;
-        }
-        memcpy(retval, tmp.c_str(), tmp.length() + 1);
-        return retval;
+        std::string tmp = Translation::getInstance().getTranslatedText(json);
+        return strdup(tmp.c_str());
     } catch (Translation::TranslationNotFoundException&) {
         log_error("Translation not found for '%s'", json);
-        return nullptr;
     } catch (Translation::CorruptedLineException&) {
         log_error("Translation json is corrupted: '%s'", json);
-        return nullptr;
     } catch (JSON::CorruptedLineException&) {
         log_error("Translation json is corrupted: '%s'", json);
-        return nullptr;
     } catch (...) {
         log_error("Undefined error in translation, possibly invalid json '%s'", json);
-        return nullptr;
     }
+
+    return nullptr;
 }
 
 
 char* translation_get_translated_text_language(const TRANSLATION_CONFIGURATION* conf, const char* json)
 {
-    if (nullptr == json || nullptr == conf) {
+    if (!(json && conf)) {
         return nullptr;
     }
 
     try {
-        std::string tmp    = Translation::getInstance().getTranslatedText(*conf, json);
-        char*       retval = static_cast<char*>(malloc(sizeof(char) * tmp.length() + 1));
-        if (nullptr == retval) {
-            log_error("Unable to allocate memory for translation C interface");
-            return nullptr;
-        }
-        memcpy(retval, tmp.c_str(), tmp.length() + 1);
-        return retval;
+        std::string tmp = Translation::getInstance().getTranslatedText(*conf, json);
+        return strdup(tmp.c_str());
     } catch (Translation::TranslationNotFoundException&) {
         log_error("Translation not found for '%s'", json);
-        return nullptr;
     } catch (Translation::CorruptedLineException&) {
         log_error("Translation json is corrupted: '%s'", json);
-        return nullptr;
     } catch (JSON::CorruptedLineException&) {
         log_error("Translation json is corrupted: '%s'", json);
-        return nullptr;
     } catch (Translation::LanguageNotLoadedException&) {
         log_error("Language '%s' is not loaded", conf->language);
-        return nullptr;
     } catch (...) {
         log_error("Undefined error in translation, possibly invalid json '%s'", json);
-        return nullptr;
     }
+
+    return nullptr;
 }

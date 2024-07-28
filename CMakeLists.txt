@@ -5,20 +5,19 @@ cmake_policy(VERSION 3.13)
 
 project(fty_common_translation
     VERSION 1.0.0
-    DESCRIPTION "Provides common translation library"
+    DESCRIPTION "Common translation library"
 )
 
-########################################################################################################################
 find_package(fty-cmake PATHS ${CMAKE_BINARY_DIR}/fty-cmake)
+
 ########################################################################################################################
 
 etn_target(shared ${PROJECT_NAME}
     PUBLIC_INCLUDE_DIR include
     PUBLIC
-        fty_common_translation_base.h
         fty_common_translation.h
     SOURCES
-        src/fty_common_translation_base.cc
+        src/fty_common_translation.cc
     USES
         fty_common
         fty_common_logging
@@ -34,9 +33,11 @@ etn_test_target(${PROJECT_NAME}
         test/data/test_cs_CZ.json
         test/data/test_empty_en_US.json
         test/data/test_en_US.json
+        test/data/real_locale_en_US.json
+        test/data/real_locale_fr_FR.json
     SOURCES
-        test/fty_common_translation_base.cc
         test/main.cpp
+        test/fty_common_translation.cpp
     USES
         pthread
     SUBDIR
@@ -51,5 +52,5 @@ install(PROGRAMS
         translations_to_weblate.awk
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-########################################################################################################################
 
+########################################################################################################################
