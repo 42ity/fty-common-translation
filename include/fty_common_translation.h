@@ -1,5 +1,5 @@
 /*  =========================================================================
-    fty-common-translation - Provides common translation library
+    fty_common_translation - Singleton translation object
 
     Copyright (C) 2014 - 2020 Eaton
 
@@ -21,11 +21,114 @@
 
 #pragma once
 
-//  Opaque class structures to allow forward references
-//  These classes are stable or legacy and built in all releases
-typedef struct _fty_common_translation_base_t fty_common_translation_base_t;
-#define FTY_COMMON_TRANSLATION_BASE_T_DEFINED
+#ifdef __cplusplus
+#include <climits>
+#else
+#include <limits.h>
+#endif
 
+typedef struct
+{
+    char* language;
+} TRANSLATION_CONFIGURATION;
 
-//  Public classes, each with its own header file
-#include "fty_common_translation_base.h"
+typedef enum
+{
+    TE_OK        = 0,
+    TE_Undefined = INT_MIN,
+    TE_InvalidFile,
+    TE_EmptyFile,
+    TE_CorruptedLine,
+    TE_LanguageNotLoaded,
+    TE_TranslationNotFound,
+    TE_NotFound
+} TRANSLATION_CRETVALS;
+
+#ifdef __cplusplus
+
+#include <map>
+#include <string>
+#include <vector>
+
+class Translation
+{
+public:
+    static Translation& getInstance()
+    {
+        static Translation instance;
+        return instance;
+    }
+
+private:
+    const std::string default_language_ = "en_US";
+
+    // language order stored for getting current language from language_list_ordering (-1 as none)
+    size_t language_order_{size_t(-1)};
+    // preloaded translation strings in map: "key" -> language list [use language_order as a key]
+    std::map<std::string, std::vector<std::string>> language_translations_;
+    // pairing language string to index with default en_US: "en_US" -> 0, ...
+    std::map<std::string, size_t> language_list_ordering_;
+    // store agent name for malamute communication
+    std::string agent_name_;
+    // store prefix for translation files
+    std::string file_prefix_;
+    // store path to translation files
+    std::string path_;
+
+    // avoid use of the following procedures/functions as this should be a singleton
+    Translation() {}
+    ~Translation() {}
+
+    // load language to structures, throws errors in case of failure
+    void loadLanguage(const std::string& language);
+
+    // get translated text inner function (potentially recursive)
+    std::string getTranslatedText(const size_t order, const std::string& json, size_t depth = 0);
+
+public:
+    // singleton, deleted functions should be public for better error handling
+    Translation(const Translation&) = delete;
+    Translation& operator=(const Translation&) = delete;
+
+    // prepare configuration
+    void configure(const std::string& agent_name, const std::string& path, const std::string& file_prefix);
+
+    // change default used language
+    void changeLanguage(const std::string& language);
+
+    // get translated text from selected language
+    std::string getTranslatedText(const std::string& json);
+    std::string getTranslatedText(const TRANSLATION_CONFIGURATION& conf, const std::string& json);
+
+    class InvalidFileException {};
+    class EmptyFileException {};
+    class CorruptedLineException {};
+    class LanguageNotLoadedException {};
+    class TranslationNotFoundException {};
+    class NotFoundException {};
+};
+
+extern "C" {
+#endif
+
+// Wrapper for initialization
+// Returns TRANSLATION_CRETVALS value (TE_OK, ...)
+int translation_initialize(const char* agent_name, const char* path, const char* file_prefix);
+
+// Wrapper for changing language
+// Returns TRANSLATION_CRETVALS value (TE_OK, ...)
+int translation_change_language(const char* language);
+
+// Wrapper for getting translated text
+// Returns valid char* if ok, else NULL
+// Returned char* must be freed by caller
+char* translation_get_translated_text(const char* json);
+
+// Wrapper for getting translated text
+// Returns valid char* if ok, else NULL
+// Returned char* must be freed by caller
+char* translation_get_translated_text_language(const TRANSLATION_CONFIGURATION* conf, const char* json);
+
+#ifdef __cplusplus
+}
+#endif

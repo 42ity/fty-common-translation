@@ -64,7 +64,7 @@ echo "" > "${OUTPUT}.ttsl"
 echo ""
 echo "===== PARSING TRANSLATE_ME() family, fty::tr() and \"string\"_tr patterns ====="
 GOT_FAE_WARRANTY_RULE=false
-for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" -E '(TRANSLATE_ME|fty *:: *tr|\"_tr)' "${TARGET}"); do
+for FILE in $(grep -rsIl --include="*.rule" --include="*.c" --include="*.cc" --include="*.cpp" --include="*.ecpp" --include="*.h" --include="*.hpp" --include="*.inc" --exclude-dir=".build" --exclude-dir=".srcclone" --exclude-dir=".install" --exclude-dir="test" --exclude-dir="tests" -E '(TRANSLATE_ME|fty *:: *tr|\"_tr)' "${TARGET}"); do
     case "$FILE" in
         fty-alert-engine/*/warranty.rule)
             # Several version patterns to consider, handled separately
@@ -125,22 +125,13 @@ done >> "${OUTPUT}.ttsl" || RETCODE=$?
 # Special handling routed above
 if $GOT_FAE_WARRANTY_RULE ; then
     # process warranty rule specially as translation strings there are not quoted
-    if [ -s fty-alert-engine/src/warranty.rule ] ; then
-        # Legacy layout
-        FILE="fty-alert-engine/src/warranty.rule"
+    if [ -s fty-alert-engine/lib/warranty.rule ] ; then
+        FILE="fty-alert-engine/lib/warranty.rule"
         sed 's/\\$//' "$FILE" | tr -d '\n' \
         | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
         | count_positional_vars \
         > "${OUTPUT}.ttsl.tmp" \
         || RETCODE=$?
-    elif [ -s fty-alert-engine/src/rule_templates/warranty.rule ]; then
-        # After alert-refactoring
-        FILE="fty-alert-engine/src/rule_templates/warranty.rule"
-        sed 's/\\$//' "$FILE" | tr -d '\n' \
-        | sed 's/TRANSLATE_ME *( */\n/g' | tail -n +2 | sed 's/\([^\]\) *\(,\|)\).*$/\1/' \
-        | count_positional_vars \
-        > "${OUTPUT}.ttsl.tmp" \
-        || { RETCODE=$?; echo "===== ERROR PARSING SOURCE '${FILE}' FOR TRANSLATE_ME =====" >&2; }
     else
         echo "ERROR : fty-alert-engine/.../warranty.rule not found" >&2
         exit 22
